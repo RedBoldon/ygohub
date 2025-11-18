@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourcePerFileMappings">
+    <file url="file://$PROJECT_DIR$/backend/deck-collection-helpers.js" value="b5fdfd40-f8d1-4f5b-91ca-63053be68f30" />
+    <file url="file://$PROJECT_DIR$/backend/import-cards.js" value="b5fdfd40-f8d1-4f5b-91ca-63053be68f30" />
     <file url="file://$PROJECT_DIR$/backend/seed.js" value="b5fdfd40-f8d1-4f5b-91ca-63053be68f30" />
   </component>
 </project>
