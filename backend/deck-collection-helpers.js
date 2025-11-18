@@ -174,16 +174,23 @@ export async function selectDeckForTournament(tournamentId, userId, snapshotDeck
 }
 
 export async function getTournamentSnapshot(tournamentId) {
-    const res = await pool.query(
-        `SELECT cs.*, sd.* FROM collection_snapshots cs
-         JOIN snapshot_decks sd ON sd.snapshot_id = cs.id
-         WHERE cs.tournament_id = $1`,
+    // Fetch snapshot first (avoids INNER JOIN issue if no decks exist)
+    const snapshotRes = await pool.query(
+        `SELECT * FROM collection_snapshots WHERE tournament_id = $1`,
         [tournamentId]
     );
-    if (res.rows.length === 0) return null;
+    if (snapshotRes.rows.length === 0) return null;
+    const snapshot = snapshotRes.rows[0];
+
+    // Fetch decks separately (avoids column name collisions like 'id')
+    const decksRes = await pool.query(
+        `SELECT * FROM snapshot_decks WHERE snapshot_id = $1`,
+        [snapshot.id]
+    );
+
     return {
-        snapshot: res.rows[0],
-        decks: res.rows.map(r => ({
+        snapshot,
+        decks: decksRes.rows.map(r => ({
             id: r.id,
             deck_name: r.deck_name,
             archetype: r.archetype,

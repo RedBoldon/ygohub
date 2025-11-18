@@ -157,9 +157,9 @@ async function runAllTests() {
         const f = await createTestFormat();
         const c = await createCollection(u.id, 'Evolving');
 
-        await createSeriesSnapshot(s.id, c.id); // v1
+        const ss = await createSeriesSnapshot(s.id, c.id); // v1
         const t1 = await createTestTournament(s.id, f.id);
-        await createTournamentSnapshot(t1.id, {sourceType:'series_snapshot', sourceId:1, seriesId:s.id}); // v2
+        await createTournamentSnapshot(t1.id, {sourceType:'series_snapshot', sourceId:ss.id, seriesId:s.id}); // v2
         const t2 = await createTestTournament(s.id, f.id);
         const ts2 = await createTournamentSnapshot(t2.id, {sourceType:'user_collection', sourceId:c.id, seriesId:s.id});
         if (ts2.version_number !== 3) throw Error('MAGIC FAILED');
