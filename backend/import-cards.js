@@ -30,13 +30,8 @@ async function importCards() {
         const cardsData = JSON.parse(fs.readFileSync(cardsPath, 'utf8'));
         console.log(`✓ Found ${cardsData.length} cards in file\n`);
 
-        // Clear existing cards
-        console.log('Step 2: Clearing existing cards...');
-        await pool.query('DELETE FROM cards');
-        console.log('✓ Existing cards cleared\n');
-
         // Prepare cards for import
-        console.log('Step 3: Processing cards...');
+        console.log('Step 2: Processing cards...');
         const processedCards = cardsData.map(card => ({
             id: card.id,
             name: card.name,
@@ -44,6 +39,7 @@ async function importCards() {
             humanReadableCardType: card.humanReadableCardType,
             frameType: card.frameType,
             description: card.desc,
+            pendulum_description: card.pend_desc || null,
             race: card.race,
             archetype: card.archetype || null,
             atk: card.atk || null,
@@ -52,7 +48,7 @@ async function importCards() {
             attribute: card.attribute || null
         }));
 
-        processedCards.forEach(c => {
+        /* processedCards.forEach(c => {
             if (![
                 'spell','effect','normal','link','trap','fusion','effect_pendulum',
                 'xyz','synchro','ritual','skill','token','fusion_pendulum',
@@ -60,26 +56,10 @@ async function importCards() {
             ].includes(c.frameType)) {
                 c.frameType = 'normal';
             }
-        });
-
-        // Statistics
-        const stats = {
-            total: processedCards.length,
-            monsters: processedCards.filter(c => c.frameType !== 'spell' && c.frameType !== 'trap').length,
-            spells: processedCards.filter(c => c.frameType === 'spell').length,
-            traps: processedCards.filter(c => c.frameType === 'trap').length,
-            withArchetype: processedCards.filter(c => c.archetype !== null).length
-        };
-
-        console.log('Statistics:');
-        console.log(`  Total Cards: ${stats.total}`);
-        console.log(`  Monsters: ${stats.monsters}`);
-        console.log(`  Spells: ${stats.spells}`);
-        console.log(`  Traps: ${stats.traps}`);
-        console.log(`  With Archetype: ${stats.withArchetype}\n`);
+        }); */
 
         // Batch insert (using chunking for better performance)
-        console.log('Step 4: Inserting cards into database...');
+        console.log('Step 3: Inserting cards into database...');
         const BATCH_SIZE = 500;
         let imported = 0;
 
@@ -92,7 +72,10 @@ async function importCards() {
             let paramIndex = 1;
 
             for (const card of batch) {
-                values.push(`($${paramIndex}, $${paramIndex + 1}, $${paramIndex + 2}, $${paramIndex + 3}, $${paramIndex + 4}, $${paramIndex + 5}, $${paramIndex + 6}, $${paramIndex + 7}, $${paramIndex + 8}, $${paramIndex + 9}, $${paramIndex + 10}, $${paramIndex + 11})`);
+                values.push(`($${paramIndex}, $${paramIndex + 1}, $${paramIndex + 2}, 
+                $${paramIndex + 3}, $${paramIndex + 4}, $${paramIndex + 5}, $${paramIndex + 6}, 
+                $${paramIndex + 7}, $${paramIndex + 8}, $${paramIndex + 9}, $${paramIndex + 10}, 
+                $${paramIndex + 11}, $${paramIndex + 12})`);
                 params.push(
                     card.id,
                     card.name,
@@ -100,6 +83,7 @@ async function importCards() {
                     card.humanReadableCardType,
                     card.frameType,
                     card.description,
+                    card.pendulum_description,
                     card.race,
                     card.archetype,
                     card.atk,
@@ -107,11 +91,11 @@ async function importCards() {
                     card.level,
                     card.attribute
                 );
-                paramIndex += 12;
+                paramIndex += 13;
             }
 
             const query = `
-                INSERT INTO cards (id, name, type, humanReadableCardType, frameType, description, race, archetype, atk, def, level, attribute)
+                INSERT INTO cards (id, name, type, humanReadableCardType, frameType, description, pendulum_description, race, archetype, atk, def, level, attribute)
                 VALUES ${values.join(', ')}
                 ON CONFLICT (id) DO UPDATE SET
                     name = EXCLUDED.name,
@@ -119,6 +103,7 @@ async function importCards() {
                     humanReadableCardType = EXCLUDED.humanReadableCardType,
                     frameType = EXCLUDED.frameType,
                     description = EXCLUDED.description,
+                    pendulum_description = EXCLUDED.pendulum_description,
                     race = EXCLUDED.race,
                     archetype = EXCLUDED.archetype,
                     atk = EXCLUDED.atk,
@@ -138,7 +123,7 @@ async function importCards() {
         console.log('\n✓ All cards imported successfully\n');
 
         // Verify import
-        console.log('Step 5: Verifying import...');
+        console.log('Step 4: Verifying import...');
         const countResult = await pool.query('SELECT COUNT(*) as count FROM cards');
         const count = parseInt(countResult.rows[0].count);
         
@@ -159,7 +144,7 @@ async function importCards() {
         console.log('✓ Card Import Complete!');
         console.log('========================================\n');
 
-        return { success: true, imported: count, stats };
+        return { success: true, imported: count };
 
     } catch (error) {
         console.error('\n========================================');
@@ -226,6 +211,7 @@ async function getCardStats() {
                 COUNT(*) FILTER (WHERE frameType NOT IN ('spell', 'trap')) as monsters,
                 COUNT(*) FILTER (WHERE frameType = 'spell') as spells,
                 COUNT(*) FILTER (WHERE frameType = 'trap') as traps,
+                COUNT(*) FILTER (WHERE frameType = 'normal') as normal_monsters,
                 COUNT(*) FILTER (WHERE frameType = 'effect') as effect_monsters,
                 COUNT(*) FILTER (WHERE frameType = 'fusion') as fusion_monsters,
                 COUNT(*) FILTER (WHERE frameType = 'synchro') as synchro_monsters,
@@ -239,32 +225,6 @@ async function getCardStats() {
         console.error('Error getting card stats:', error);
         throw error;
     }
-}
-
-// Run if executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-    importCards()
-        .then(async (result) => {
-            console.log('\nDatabase Statistics:');
-            const stats = await getCardStats();
-            console.log(`  Total Cards: ${stats.total_cards}`);
-            console.log(`  Monsters: ${stats.monsters}`);
-            console.log(`  - Effect: ${stats.effect_monsters}`);
-            console.log(`  - Fusion: ${stats.fusion_monsters}`);
-            console.log(`  - Synchro: ${stats.synchro_monsters}`);
-            console.log(`  - Xyz: ${stats.xyz_monsters}`);
-            console.log(`  - Link: ${stats.link_monsters}`);
-            console.log(`  Spells: ${stats.spells}`);
-            console.log(`  Traps: ${stats.traps}`);
-            console.log(`  Unique Archetypes: ${stats.unique_archetypes}\n`);
-            
-            //await pool.end();
-            process.exit(0);
-        })
-        .catch(async () => {
-            await pool.end();
-            process.exit(1);
-        });
 }
 
 export { 
