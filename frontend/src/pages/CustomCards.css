@@ -1,0 +1,144 @@
+.custom-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.custom-card {
+  background: var(--bg-card);
+  border: 2px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.custom-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card);
+}
+
+/* Frame type colors */
+.custom-card-spell {
+  border-color: rgba(30, 130, 76, 0.5);
+}
+
+.custom-card-trap {
+  border-color: rgba(155, 89, 182, 0.5);
+}
+
+.custom-card-effect,
+.custom-card-normal {
+  border-color: rgba(230, 126, 34, 0.5);
+}
+
+.custom-card-fusion,
+.custom-card-fusion_pendulum {
+  border-color: rgba(142, 68, 173, 0.5);
+}
+
+.custom-card-synchro,
+.custom-card-synchro_pendulum {
+  border-color: rgba(236, 240, 241, 0.4);
+}
+
+.custom-card-xyz,
+.custom-card-xyz_pendulum {
+  border-color: rgba(44, 62, 80, 0.6);
+}
+
+.custom-card-link {
+  border-color: rgba(52, 152, 219, 0.5);
+}
+
+.custom-card-ritual,
+.custom-card-ritual_pendulum {
+  border-color: rgba(41, 128, 185, 0.5);
+}
+
+.custom-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.custom-card-name {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--text-primary);
+}
+
+.custom-card-attr {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.4rem;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  color: var(--gold-primary);
+  text-transform: uppercase;
+}
+
+.custom-card-type {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+}
+
+.custom-card-desc {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.custom-card-stats {
+  display: flex;
+  gap: 1rem;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  color: var(--gold-primary);
+  margin-bottom: 0.75rem;
+}
+
+.custom-card-actions {
+  display: flex;
+  gap: 0.25rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* Form */
+.custom-card-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.custom-card-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.custom-card-form select.input {
+  cursor: pointer;
+}
+
+.custom-card-form textarea.input {
+  resize: vertical;
+  min-height: 80px;
+}
+
+@media (max-width: 480px) {
+  .custom-card-form .form-row {
+    grid-template-columns: 1fr;
+  }
+}

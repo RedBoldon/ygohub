@@ -1,0 +1,35 @@
+.create-tournament {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.tournament-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.tournament-form .input-with-icon .input {
+  padding-left: 2.75rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+@media (max-width: 480px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}

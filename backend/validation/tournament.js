@@ -7,24 +7,32 @@ export const createTournamentSchema = z.object({
         .trim(),
     minPlayerCount: z.number()
         .int()
-        .min(2, 'Minimum 2 players required'),
+        .min(2, 'Minimum 2 players required')
+        .default(2),
     maxPlayerCount: z.number()
         .int()
-        .min(2, 'Maximum players must be at least 2'),
+        .min(2, 'Maximum players must be at least 2')
+        .optional(),
     formatId: z.number()
         .int()
-        .positive('Format is required'),
+        .positive('Format ID must be positive')
+        .optional(),
     seriesId: z.number()
         .int()
         .positive()
         .optional(),
     location: z.string()
-        .max(200, 'Location must be 200 characters or less')
+        .max(500, 'Location must be 500 characters or less')
         .trim()
         .optional(),
-    startingTime: z.iso
+    startingTime: z.string()
         .datetime({ message: 'Invalid datetime format' })
+        .optional(),
+    numberOfRounds: z.number()
+        .int()
+        .min(1, 'Must have at least 1 round')
+        .optional(),
 }).refine(
-    data => data.maxPlayerCount >= data.minPlayerCount,
+    data => !data.maxPlayerCount || !data.minPlayerCount || data.maxPlayerCount >= data.minPlayerCount,
     { message: 'Max players must be greater than or equal to min players', path: ['maxPlayerCount'] }
 );

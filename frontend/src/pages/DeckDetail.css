@@ -1,0 +1,154 @@
+.deck-archetype-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--purple-light);
+  background: rgba(107, 76, 154, 0.2);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  margin-top: 0.5rem;
+}
+
+.deck-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.deck-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.section-title {
+  font-size: 1.25rem;
+  color: var(--gold-primary);
+}
+
+.section-count {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.section-empty {
+  color: var(--text-muted);
+  text-align: center;
+  padding: 2rem;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.75rem;
+}
+
+.card-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  gap: 0.75rem;
+}
+
+.card-item-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.card-item-name {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-item-qty {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.card-item-meta {
+  flex-shrink: 0;
+}
+
+.card-type {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 0.2rem 0.4rem;
+  border-radius: var(--radius-sm);
+}
+
+.card-type-spell {
+  background: rgba(30, 130, 76, 0.2);
+  color: #2ecc71;
+}
+
+.card-type-trap {
+  background: rgba(155, 89, 182, 0.2);
+  color: #9b59b6;
+}
+
+.card-type-effect,
+.card-type-normal {
+  background: rgba(230, 126, 34, 0.2);
+  color: #e67e22;
+}
+
+.card-type-fusion {
+  background: rgba(142, 68, 173, 0.2);
+  color: #8e44ad;
+}
+
+.card-type-synchro {
+  background: rgba(236, 240, 241, 0.2);
+  color: #ecf0f1;
+}
+
+.card-type-xyz {
+  background: rgba(44, 62, 80, 0.3);
+  color: #95a5a6;
+}
+
+.card-type-link {
+  background: rgba(52, 152, 219, 0.2);
+  color: #3498db;
+}
+
+.card-type-ritual {
+  background: rgba(41, 128, 185, 0.2);
+  color: #2980b9;
+}
+
+.card-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  transition: color 0.2s;
+}
+
+.card-remove:hover {
+  color: var(--red-light);
+}

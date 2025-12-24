@@ -1,0 +1,266 @@
+.tournament-detail {
+  animation: fadeIn 0.3s ease;
+}
+
+.tournament-header {
+  margin-bottom: 2rem;
+}
+
+.tournament-title-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.tournament-meta-row {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.tournament-meta-row .meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.invite-code-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  margin-bottom: 1rem;
+}
+
+.invite-label {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.invite-code {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--gold-primary);
+  letter-spacing: 0.1em;
+}
+
+.tournament-actions {
+  margin-top: 1rem;
+}
+
+/* Tab Content */
+.tab-content {
+  animation: fadeIn 0.2s ease;
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+/* Participants */
+.participant-list {
+  list-style: none;
+}
+
+.participant-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.participant-item:last-child {
+  border-bottom: none;
+}
+
+.participant-rank {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+  border-radius: 50%;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.participant-name {
+  font-weight: 500;
+}
+
+.participant-tag {
+  color: var(--text-muted);
+  margin-left: 0.25rem;
+}
+
+.empty-message {
+  color: var(--text-muted);
+  text-align: center;
+  padding: 2rem;
+}
+
+/* Matches */
+.matches-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.match-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+}
+
+.match-teams {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.match-team {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 120px;
+}
+
+.match-team.winner {
+  color: var(--gold-primary);
+}
+
+.match-score {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.match-vs {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+}
+
+.match-bye {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.bye-label {
+  background: var(--bg-secondary);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+/* Standings */
+.rank-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rank-badge .gold {
+  color: #FFD700;
+}
+
+.rank-badge .silver {
+  color: #C0C0C0;
+}
+
+.rank-badge .bronze {
+  color: #CD7F32;
+}
+
+.player-name {
+  font-weight: 500;
+}
+
+.player-tag {
+  color: var(--text-muted);
+  margin-left: 0.25rem;
+}
+
+/* Rounds */
+.rounds-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.round-card .card-header {
+  margin-bottom: 1rem;
+}
+
+/* Result Modal */
+.result-form {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 1rem 0;
+}
+
+.result-team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.team-name {
+  font-weight: 600;
+}
+
+.score-input {
+  width: 80px;
+  text-align: center;
+  font-size: 1.5rem;
+  font-family: var(--font-display);
+}
+
+.result-vs {
+  color: var(--text-muted);
+  font-size: 1.25rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .match-teams {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .match-team {
+    min-width: auto;
+  }
+
+  .result-form {
+    flex-direction: column;
+  }
+}
