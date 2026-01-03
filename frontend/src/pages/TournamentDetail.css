@@ -29,11 +29,12 @@
   font-size: 0.95rem;
 }
 
+/* Invite Code Box */
 .invite-code-box {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
   background: var(--bg-tertiary);
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-md);
@@ -45,15 +46,58 @@
   font-size: 0.875rem;
 }
 
-.invite-code {
-  font-family: var(--font-display);
-  font-size: 1.25rem;
-  color: var(--gold-primary);
-  letter-spacing: 0.1em;
+.invite-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
+.invite-code {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--gold-primary);
+  letter-spacing: 0.15em;
+  background: var(--bg-secondary);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+}
+
+/* Tournament Actions */
 .tournament-actions {
-  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.action-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--gold-primary);
+  font-size: 0.9rem;
+}
+
+.action-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.start-action {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.confirm-text {
+  font-weight: 500;
+  color: var(--gold-primary);
 }
 
 /* Tab Content */
@@ -70,11 +114,14 @@
 /* Participants */
 .participant-list {
   list-style: none;
+  max-height: 400px;
+  overflow-y: auto;
 }
 
 .participant-item {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 1rem;
   padding: 0.75rem 0;
   border-bottom: 1px solid var(--border-subtle);
@@ -82,6 +129,12 @@
 
 .participant-item:last-child {
   border-bottom: none;
+}
+
+.participant-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .participant-rank {
@@ -126,12 +179,14 @@
   padding: 1rem;
   background: var(--bg-tertiary);
   border-radius: var(--radius-md);
+  gap: 1rem;
 }
 
 .match-teams {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex: 1;
 }
 
 .match-team {
@@ -143,6 +198,10 @@
 
 .match-team.winner {
   color: var(--gold-primary);
+}
+
+.match-team.winner span:first-child {
+  font-weight: 600;
 }
 
 .match-score {
@@ -263,4 +322,176 @@
   .result-form {
     flex-direction: column;
   }
+  
+  .invite-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .participant-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .deck-select {
+    width: 100%;
+  }
+}
+
+/* Deck Assignment */
+.deck-select {
+  min-width: 150px;
+  max-width: 200px;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+.assigned-deck-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8rem;
+  color: var(--purple-light);
+  background: rgba(107, 76, 154, 0.15);
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-sm);
+}
+
+/* Player Deck Selection (Player Mode) */
+.player-deck-section {
+  margin: 1.5rem 0;
+  padding: 1rem 1.25rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+}
+
+.player-deck-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.player-deck-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.selected-deck-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.selected-deck-info .check-icon {
+  color: var(--success-primary);
+}
+
+.selected-deck-name {
+  font-weight: 500;
+  color: var(--gold-primary);
+}
+
+.selected-deck-info.locked .deck-locked-badge {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+}
+
+.no-deck-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--warning-primary);
+}
+
+.no-deck-warning span {
+  font-size: 0.9rem;
+}
+
+/* Deck Selection Modal */
+.deck-selection-list {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.deck-collection-group {
+  margin-bottom: 1.5rem;
+}
+
+.deck-collection-group:last-child {
+  margin-bottom: 0;
+}
+
+.collection-group-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.deck-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.deck-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.875rem 1rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+}
+
+.deck-option:hover {
+  background: var(--bg-secondary);
+  border-color: var(--border-medium);
+}
+
+.deck-option.selected {
+  border-color: var(--gold-primary);
+  background: rgba(212, 175, 55, 0.1);
+}
+
+.deck-option-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.deck-option-name {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.deck-option-archetype {
+  font-size: 0.85rem;
+  color: var(--gold-muted);
+}
+
+.deck-option-cards {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.deck-selected-icon {
+  color: var(--gold-primary);
 }

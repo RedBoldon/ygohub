@@ -9,7 +9,11 @@ import {
   ChevronRight, 
   Edit2, 
   Trash2,
-  BookOpen
+  BookOpen,
+  History,
+  Trophy,
+  PlusCircle,
+  MinusCircle
 } from 'lucide-react';
 import Modal from '../components/Modal';
 import './CollectionDetail.css';
@@ -22,6 +26,11 @@ export default function CollectionDetail() {
   const [editDeck, setEditDeck] = useState(null);
   const [formData, setFormData] = useState({ deckName: '', archetype: '', description: '' });
   const [saving, setSaving] = useState(false);
+  
+  // History modal state
+  const [historyModalOpen, setHistoryModalOpen] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [history, setHistory] = useState([]);
 
   const toast = useToast();
 
@@ -31,12 +40,25 @@ export default function CollectionDetail() {
 
   const loadCollection = async () => {
     try {
-      const data = await api.customCollections.get(id);
+      const data = await api.collections.get(id);
       setCollection(data.collection);
     } catch (err) {
       toast.error('Failed to load collection');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadHistory = async () => {
+    setHistoryModalOpen(true);
+    setHistoryLoading(true);
+    try {
+      const data = await api.collections.getHistory(id);
+      setHistory(data.history || []);
+    } catch (err) {
+      toast.error('Failed to load history');
+    } finally {
+      setHistoryLoading(false);
     }
   };
 
@@ -56,14 +78,14 @@ export default function CollectionDetail() {
 
     try {
       if (editDeck) {
-        await api.customCollections.updateDeck(editDeck.id, {
+        await api.collections.updateDeck(editDeck.id, {
           deckName: formData.deckName,
           archetype: formData.archetype,
           description: formData.description,
         });
         toast.success('Deck updated');
       } else {
-        await api.customCollections.addDeck(
+        await api.collections.createDeck(
           id,
           formData.deckName,
           formData.archetype,
@@ -84,7 +106,7 @@ export default function CollectionDetail() {
     if (!confirm('Are you sure you want to delete this deck?')) return;
 
     try {
-      await api.customCollections.deleteDeck(deckId);
+      await api.collections.deleteDeck(deckId);
       toast.success('Deck deleted');
       loadCollection();
     } catch (err) {
@@ -128,10 +150,16 @@ export default function CollectionDetail() {
               <p className="page-subtitle">{collection.description}</p>
             )}
           </div>
-          <button className="btn btn-primary" onClick={() => openModal()}>
-            <Plus size={18} />
-            Add Deck
-          </button>
+          <div className="header-actions">
+            <button className="btn btn-secondary" onClick={loadHistory}>
+              <History size={18} />
+              Check History
+            </button>
+            <button className="btn btn-primary" onClick={() => openModal()}>
+              <Plus size={18} />
+              Add Deck
+            </button>
+          </div>
         </div>
       </div>
 
@@ -157,19 +185,20 @@ export default function CollectionDetail() {
                   {deck.description && (
                     <p className="deck-desc">{deck.description}</p>
                   )}
+                  <span className="deck-card-count">{deck.card_count || 0} cards</span>
                 </div>
                 <ChevronRight size={20} className="deck-arrow" />
               </Link>
               <div className="deck-actions">
                 <button 
                   className="btn btn-ghost btn-sm"
-                  onClick={() => openModal(deck)}
+                  onClick={(e) => { e.preventDefault(); openModal(deck); }}
                 >
                   <Edit2 size={16} />
                 </button>
                 <button 
                   className="btn btn-ghost btn-sm"
-                  onClick={() => handleDeleteDeck(deck.id)}
+                  onClick={(e) => { e.preventDefault(); handleDeleteDeck(deck.id); }}
                 >
                   <Trash2 size={16} />
                 </button>
@@ -238,6 +267,78 @@ export default function CollectionDetail() {
           </div>
         </form>
       </Modal>
+
+      {/* History Modal */}
+      <Modal
+        isOpen={historyModalOpen}
+        onClose={() => setHistoryModalOpen(false)}
+        title="Collection History"
+      >
+        {historyLoading ? (
+          <div className="loading-container">
+            <div className="spinner"></div>
+          </div>
+        ) : history.length === 0 ? (
+          <div className="empty-state-small">
+            <History size={48} />
+            <h4>No Tournament History</h4>
+            <p>This collection hasn't been used in any tournaments yet.</p>
+          </div>
+        ) : (
+          <div className="history-list">
+            {history.map((entry, index) => (
+              <div key={entry.snapshotId} className="history-entry">
+                <div className="history-header">
+                  <div className="history-tournament">
+                    <Trophy size={16} />
+                    <Link to={`/tournaments/${entry.tournament.id}`} className="history-tournament-name">
+                      {entry.tournament.name}
+                    </Link>
+                    <span className={`badge badge-sm badge-${getStatusColor(entry.tournament.status)}`}>
+                      {entry.tournament.status}
+                    </span>
+                  </div>
+                                  <div className="history-meta">
+                    <span className="history-date">{new Date(entry.createdAt).toLocaleDateString()}</span>
+                  </div>
+                </div>
+                
+                <div className="history-decks">
+                  <span className="history-deck-count">{entry.decks.length} decks</span>
+                  <div className="history-deck-names">
+                    {entry.decks.map(d => d.name).join(', ')}
+                  </div>
+                </div>
+
+                {entry.changes && (entry.changes.added.length > 0 || entry.changes.removed.length > 0) && (
+                  <div className="history-changes">
+                    {entry.changes.added.length > 0 && (
+                      <div className="history-change added">
+                        <PlusCircle size={14} />
+                        <span>Added: {entry.changes.added.join(', ')}</span>
+                      </div>
+                    )}
+                    {entry.changes.removed.length > 0 && (
+                      <div className="history-change removed">
+                        <MinusCircle size={14} />
+                        <span>Removed: {entry.changes.removed.join(', ')}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {index === history.length - 1 && (
+                  <div className="history-initial">Initial snapshot</div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </Modal>
     </div>
   );
+}
+
+function getStatusColor(status) {
+  return { open: 'green', in_progress: 'blue', completed: 'gold', cancelled: 'red' }[status] || 'gold';
 }

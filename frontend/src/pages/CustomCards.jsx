@@ -5,14 +5,72 @@ import { Plus, Edit2, Trash2, Sparkles } from 'lucide-react';
 import Modal from '../components/Modal';
 import './CustomCards.css';
 
-const FRAME_TYPES = [
-  'spell', 'effect', 'normal', 'link', 'trap', 'fusion',
-  'effect_pendulum', 'xyz', 'synchro', 'ritual', 'token',
-  'fusion_pendulum', 'normal_pendulum', 'synchro_pendulum',
-  'xyz_pendulum', 'ritual_pendulum'
-];
+// Card types with their categories
+const CARD_TYPES = {
+  // Spells
+  'Normal Spell': { category: 'spell', defaultRace: 'Normal' },
+  'Quick-Play Spell': { category: 'spell', defaultRace: 'Quick-Play' },
+  'Continuous Spell': { category: 'spell', defaultRace: 'Continuous' },
+  'Equip Spell': { category: 'spell', defaultRace: 'Equip' },
+  'Field Spell': { category: 'spell', defaultRace: 'Field' },
+  'Ritual Spell': { category: 'spell', defaultRace: 'Ritual' },
+  // Traps
+  'Normal Trap': { category: 'trap', defaultRace: 'Normal' },
+  'Continuous Trap': { category: 'trap', defaultRace: 'Continuous' },
+  'Counter Trap': { category: 'trap', defaultRace: 'Counter' },
+  // Monsters
+  'Normal Monster': { category: 'monster' },
+  'Effect Monster': { category: 'monster' },
+  'Flip Effect Monster': { category: 'monster' },
+  'Tuner Monster': { category: 'monster' },
+  'Gemini Monster': { category: 'monster' },
+  'Spirit Monster': { category: 'monster' },
+  'Union Monster': { category: 'monster' },
+  'Toon Monster': { category: 'monster' },
+  'Ritual Monster': { category: 'monster' },
+  'Ritual Effect Monster': { category: 'monster' },
+  'Fusion Monster': { category: 'monster' },
+  'Synchro Monster': { category: 'monster' },
+  'Synchro Tuner Monster': { category: 'monster' },
+  'XYZ Monster': { category: 'monster' },
+  'Link Monster': { category: 'monster', noDefense: true },
+  // Pendulum Monsters
+  'Pendulum Normal Monster': { category: 'monster', pendulum: true },
+  'Pendulum Effect Monster': { category: 'monster', pendulum: true },
+  'Pendulum Tuner Effect Monster': { category: 'monster', pendulum: true },
+  'Pendulum Flip Effect Monster': { category: 'monster', pendulum: true },
+  'Synchro Pendulum Monster': { category: 'monster', pendulum: true },
+  'XYZ Pendulum Monster': { category: 'monster', pendulum: true },
+  'Fusion Pendulum Monster': { category: 'monster', pendulum: true },
+  'Ritual Pendulum Monster': { category: 'monster', pendulum: true },
+};
 
 const ATTRIBUTES = ['DARK', 'LIGHT', 'EARTH', 'WATER', 'FIRE', 'WIND', 'DIVINE'];
+
+// Helper to parse pendulum description
+function parsePendulumDescription(description) {
+  if (!description) return { pendulumEffect: '', monsterEffect: '' };
+  
+  const separator = '【Monster Effect】';
+  const pendulumMarker = '【Pendulum Effect】';
+  
+  if (description.includes(separator)) {
+    const parts = description.split(separator);
+    let pendulumEffect = parts[0].replace(pendulumMarker, '').trim();
+    let monsterEffect = parts[1]?.trim() || '';
+    return { pendulumEffect, monsterEffect };
+  }
+  
+  return { pendulumEffect: '', monsterEffect: description };
+}
+
+// Helper to combine pendulum description
+function combinePendulumDescription(pendulumEffect, monsterEffect) {
+  if (!pendulumEffect && !monsterEffect) return '';
+  if (!pendulumEffect) return monsterEffect;
+  if (!monsterEffect) return `【Pendulum Effect】\n${pendulumEffect}`;
+  return `【Pendulum Effect】\n${pendulumEffect}\n【Monster Effect】\n${monsterEffect}`;
+}
 
 export default function CustomCards() {
   const [cards, setCards] = useState([]);
@@ -22,19 +80,24 @@ export default function CustomCards() {
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    type: 'Effect Monster',
-    humanReadableCardType: 'Effect Monster',
-    frameType: 'effect',
+    humanreadablecardtype: 'Effect Monster',
     description: '',
+    pendulumEffect: '',
+    monsterEffect: '',
     race: '',
-    archetype: '',
     atk: '',
     def: '',
     level: '',
-    attribute: '',
+    attribute: 'DARK',
   });
 
   const toast = useToast();
+
+  // Derived state
+  const cardTypeInfo = CARD_TYPES[formData.humanreadablecardtype] || { category: 'monster' };
+  const isMonster = cardTypeInfo.category === 'monster';
+  const isLink = formData.humanreadablecardtype === 'Link Monster';
+  const isPendulum = cardTypeInfo.pendulum === true;
 
   useEffect(() => {
     loadCards();
@@ -54,55 +117,122 @@ export default function CustomCards() {
   const openModal = (card = null) => {
     setEditCard(card);
     if (card) {
+      const cardTypeInfo = CARD_TYPES[card.humanreadablecardtype] || {};
+      const isPendulumCard = cardTypeInfo.pendulum === true;
+      
+      let pendulumEffect = '';
+      let monsterEffect = '';
+      let description = card.description || '';
+      
+      if (isPendulumCard) {
+        const parsed = parsePendulumDescription(card.description);
+        pendulumEffect = parsed.pendulumEffect;
+        monsterEffect = parsed.monsterEffect;
+      }
+      
       setFormData({
         name: card.name,
-        type: card.type,
-        humanReadableCardType: card.humanreadablecardtype,
-        frameType: card.frametype,
-        description: card.description,
+        humanreadablecardtype: card.humanreadablecardtype,
+        description: isPendulumCard ? '' : description,
+        pendulumEffect,
+        monsterEffect,
         race: card.race || '',
-        archetype: card.archetype || '',
         atk: card.atk?.toString() || '',
         def: card.def?.toString() || '',
         level: card.level?.toString() || '',
-        attribute: card.attribute || '',
+        attribute: card.attribute || 'DARK',
       });
     } else {
       setFormData({
         name: '',
-        type: 'Effect Monster',
-        humanReadableCardType: 'Effect Monster',
-        frameType: 'effect',
+        humanreadablecardtype: 'Effect Monster',
         description: '',
+        pendulumEffect: '',
+        monsterEffect: '',
         race: '',
-        archetype: '',
         atk: '',
         def: '',
         level: '',
-        attribute: '',
+        attribute: 'DARK',
       });
     }
     setModalOpen(true);
+  };
+
+  const handleCardTypeChange = (newType) => {
+    const typeInfo = CARD_TYPES[newType];
+    const wasPendulum = isPendulum;
+    const willBePendulum = typeInfo?.pendulum === true;
+    
+    setFormData(f => {
+      let newFormData = {
+        ...f,
+        humanreadablecardtype: newType,
+        // Auto-set race for spells/traps
+        race: typeInfo?.defaultRace || f.race,
+      };
+      
+      // Clear monster fields if switching to spell/trap
+      if (typeInfo?.category !== 'monster') {
+        newFormData = {
+          ...newFormData,
+          atk: '',
+          def: '',
+          level: '',
+          attribute: '',
+          pendulumEffect: '',
+          monsterEffect: '',
+        };
+      }
+      
+      // Clear DEF for Link monsters
+      if (newType === 'Link Monster') {
+        newFormData.def = '';
+      }
+      
+      // Handle pendulum transition
+      if (wasPendulum && !willBePendulum) {
+        // Was pendulum, now not - combine effects into description
+        newFormData.description = f.monsterEffect || f.pendulumEffect;
+        newFormData.pendulumEffect = '';
+        newFormData.monsterEffect = '';
+      } else if (!wasPendulum && willBePendulum) {
+        // Was not pendulum, now is - move description to monster effect
+        newFormData.monsterEffect = f.description;
+        newFormData.description = '';
+        newFormData.pendulumEffect = '';
+      }
+      
+      return newFormData;
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
 
+    // Build description
+    let finalDescription;
+    if (isPendulum) {
+      finalDescription = combinePendulumDescription(formData.pendulumEffect, formData.monsterEffect);
+    } else {
+      finalDescription = formData.description;
+    }
+
     const data = {
       name: formData.name,
-      type: formData.type,
-      humanReadableCardType: formData.humanReadableCardType,
-      frameType: formData.frameType,
-      description: formData.description,
+      humanreadablecardtype: formData.humanreadablecardtype,
+      description: finalDescription,
       race: formData.race,
     };
 
-    if (formData.archetype) data.archetype = formData.archetype;
-    if (formData.atk) data.atk = parseInt(formData.atk);
-    if (formData.def) data.def = parseInt(formData.def);
-    if (formData.level) data.level = parseInt(formData.level);
-    if (formData.attribute) data.attribute = formData.attribute;
+    // Only include monster fields if it's a monster
+    if (isMonster) {
+      if (formData.atk) data.atk = parseInt(formData.atk);
+      if (formData.def && !isLink) data.def = parseInt(formData.def);
+      if (formData.level) data.level = parseInt(formData.level);
+      if (formData.attribute) data.attribute = formData.attribute;
+    }
 
     try {
       if (editCard) {
@@ -131,6 +261,15 @@ export default function CustomCards() {
     } catch (err) {
       toast.error(err.message || 'Failed to delete card');
     }
+  };
+
+  // Check if form is valid
+  const isFormValid = () => {
+    if (!formData.name.trim() || !formData.race.trim()) return false;
+    if (isPendulum) {
+      return formData.pendulumEffect.trim() || formData.monsterEffect.trim();
+    }
+    return formData.description.trim();
   };
 
   if (loading) {
@@ -180,9 +319,9 @@ export default function CustomCards() {
               <p className="custom-card-desc">{card.description}</p>
               {(card.atk !== null || card.def !== null) && (
                 <div className="custom-card-stats">
+                  {card.level !== null && <span>LV{card.level}</span>}
                   {card.atk !== null && <span>ATK/{card.atk}</span>}
                   {card.def !== null && <span>DEF/{card.def}</span>}
-                  {card.level !== null && <span>LV{card.level}</span>}
                 </div>
               )}
               <div className="custom-card-actions">
@@ -217,7 +356,7 @@ export default function CustomCards() {
             <button 
               className="btn btn-primary"
               onClick={handleSubmit}
-              disabled={saving || !formData.name.trim()}
+              disabled={saving || !isFormValid()}
             >
               {saving ? 'Saving...' : (editCard ? 'Update' : 'Create')}
             </button>
@@ -225,151 +364,207 @@ export default function CustomCards() {
         }
       >
         <form onSubmit={handleSubmit} className="custom-card-form">
-          <div className="form-row">
-            <div className="input-group">
-              <label htmlFor="name">Name *</label>
-              <input
-                type="text"
-                id="name"
-                className="input"
-                value={formData.name}
-                onChange={(e) => setFormData(f => ({ ...f, name: e.target.value }))}
-                required
-              />
-            </div>
-            <div className="input-group">
-              <label htmlFor="frameType">Frame Type *</label>
-              <select
-                id="frameType"
-                className="input"
-                value={formData.frameType}
-                onChange={(e) => setFormData(f => ({ ...f, frameType: e.target.value }))}
-              >
-                {FRAME_TYPES.map(ft => (
-                  <option key={ft} value={ft}>{ft}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="input-group">
-              <label htmlFor="type">Type *</label>
-              <input
-                type="text"
-                id="type"
-                className="input"
-                placeholder="Effect Monster"
-                value={formData.type}
-                onChange={(e) => setFormData(f => ({ ...f, type: e.target.value }))}
-                required
-              />
-            </div>
-            <div className="input-group">
-              <label htmlFor="humanReadableCardType">Card Type Display *</label>
-              <input
-                type="text"
-                id="humanReadableCardType"
-                className="input"
-                placeholder="Effect Monster"
-                value={formData.humanReadableCardType}
-                onChange={(e) => setFormData(f => ({ ...f, humanReadableCardType: e.target.value }))}
-                required
-              />
-            </div>
-          </div>
-
           <div className="input-group">
-            <label htmlFor="description">Description *</label>
-            <textarea
-              id="description"
+            <label htmlFor="name">Card Name *</label>
+            <input
+              type="text"
+              id="name"
               className="input"
-              value={formData.description}
-              onChange={(e) => setFormData(f => ({ ...f, description: e.target.value }))}
-              rows={4}
+              placeholder="Blue-Eyes Custom Dragon"
+              value={formData.name}
+              onChange={(e) => setFormData(f => ({ ...f, name: e.target.value }))}
+              maxLength={200}
               required
             />
           </div>
 
-          <div className="form-row">
+          <div className="input-group">
+            <label htmlFor="humanreadablecardtype">Card Type *</label>
+            <select
+              id="humanreadablecardtype"
+              className="input"
+              value={formData.humanreadablecardtype}
+              onChange={(e) => handleCardTypeChange(e.target.value)}
+            >
+              <optgroup label="Spell Cards">
+                <option value="Normal Spell">Normal Spell</option>
+                <option value="Quick-Play Spell">Quick-Play Spell</option>
+                <option value="Continuous Spell">Continuous Spell</option>
+                <option value="Equip Spell">Equip Spell</option>
+                <option value="Field Spell">Field Spell</option>
+                <option value="Ritual Spell">Ritual Spell</option>
+              </optgroup>
+              <optgroup label="Trap Cards">
+                <option value="Normal Trap">Normal Trap</option>
+                <option value="Continuous Trap">Continuous Trap</option>
+                <option value="Counter Trap">Counter Trap</option>
+              </optgroup>
+              <optgroup label="Main Deck Monsters">
+                <option value="Normal Monster">Normal Monster</option>
+                <option value="Effect Monster">Effect Monster</option>
+                <option value="Flip Effect Monster">Flip Effect Monster</option>
+                <option value="Tuner Monster">Tuner Monster</option>
+                <option value="Gemini Monster">Gemini Monster</option>
+                <option value="Spirit Monster">Spirit Monster</option>
+                <option value="Union Monster">Union Monster</option>
+                <option value="Toon Monster">Toon Monster</option>
+                <option value="Ritual Monster">Ritual Monster</option>
+                <option value="Ritual Effect Monster">Ritual Effect Monster</option>
+              </optgroup>
+              <optgroup label="Extra Deck Monsters">
+                <option value="Fusion Monster">Fusion Monster</option>
+                <option value="Synchro Monster">Synchro Monster</option>
+                <option value="Synchro Tuner Monster">Synchro Tuner Monster</option>
+                <option value="XYZ Monster">XYZ Monster</option>
+                <option value="Link Monster">Link Monster</option>
+              </optgroup>
+              <optgroup label="Pendulum Monsters">
+                <option value="Pendulum Normal Monster">Pendulum Normal Monster</option>
+                <option value="Pendulum Effect Monster">Pendulum Effect Monster</option>
+                <option value="Pendulum Tuner Effect Monster">Pendulum Tuner Effect Monster</option>
+                <option value="Pendulum Flip Effect Monster">Pendulum Flip Effect Monster</option>
+                <option value="Synchro Pendulum Monster">Synchro Pendulum Monster</option>
+                <option value="XYZ Pendulum Monster">XYZ Pendulum Monster</option>
+                <option value="Fusion Pendulum Monster">Fusion Pendulum Monster</option>
+                <option value="Ritual Pendulum Monster">Ritual Pendulum Monster</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <div className="input-group">
+            <label htmlFor="race">
+              {isMonster ? 'Monster Type *' : 'Spell/Trap Type *'}
+            </label>
+            <input
+              type="text"
+              id="race"
+              className="input"
+              placeholder={isMonster ? 'Dragon, Warrior, Spellcaster...' : 'Normal, Continuous, Counter...'}
+              value={formData.race}
+              onChange={(e) => setFormData(f => ({ ...f, race: e.target.value }))}
+              maxLength={30}
+              required
+            />
+            <span className="input-hint">Max 30 characters</span>
+          </div>
+
+          {/* Pendulum cards have two effect boxes */}
+          {isPendulum ? (
+            <>
+              <div className="input-group pendulum-effect-group">
+                <label htmlFor="pendulumEffect">
+                  <span className="effect-label pendulum-label">Pendulum Effect</span>
+                </label>
+                <textarea
+                  id="pendulumEffect"
+                  className="input pendulum-textarea"
+                  placeholder="Once per turn, you can..."
+                  value={formData.pendulumEffect}
+                  onChange={(e) => setFormData(f => ({ ...f, pendulumEffect: e.target.value }))}
+                  rows={3}
+                />
+              </div>
+              <div className="input-group monster-effect-group">
+                <label htmlFor="monsterEffect">
+                  <span className="effect-label monster-label">Monster Effect</span>
+                </label>
+                <textarea
+                  id="monsterEffect"
+                  className="input monster-textarea"
+                  placeholder="When this card is summoned..."
+                  value={formData.monsterEffect}
+                  onChange={(e) => setFormData(f => ({ ...f, monsterEffect: e.target.value }))}
+                  rows={3}
+                />
+              </div>
+            </>
+          ) : (
             <div className="input-group">
-              <label htmlFor="race">Race/Type *</label>
-              <input
-                type="text"
-                id="race"
+              <label htmlFor="description">
+                {isMonster ? 'Effect/Flavor Text *' : 'Card Effect *'}
+              </label>
+              <textarea
+                id="description"
                 className="input"
-                placeholder="Dragon"
-                value={formData.race}
-                onChange={(e) => setFormData(f => ({ ...f, race: e.target.value }))}
+                placeholder={isMonster 
+                  ? 'This legendary dragon is a powerful engine of destruction...'
+                  : 'Activate this card when...'
+                }
+                value={formData.description}
+                onChange={(e) => setFormData(f => ({ ...f, description: e.target.value }))}
+                rows={4}
                 required
               />
             </div>
-            <div className="input-group">
-              <label htmlFor="archetype">Archetype</label>
-              <input
-                type="text"
-                id="archetype"
-                className="input"
-                placeholder="Blue-Eyes"
-                value={formData.archetype}
-                onChange={(e) => setFormData(f => ({ ...f, archetype: e.target.value }))}
-              />
-            </div>
-          </div>
+          )}
 
-          <div className="form-row">
-            <div className="input-group">
-              <label htmlFor="attribute">Attribute</label>
-              <select
-                id="attribute"
-                className="input"
-                value={formData.attribute}
-                onChange={(e) => setFormData(f => ({ ...f, attribute: e.target.value }))}
-              >
-                <option value="">None</option>
-                {ATTRIBUTES.map(attr => (
-                  <option key={attr} value={attr}>{attr}</option>
-                ))}
-              </select>
-            </div>
-            <div className="input-group">
-              <label htmlFor="level">Level/Rank</label>
-              <input
-                type="number"
-                id="level"
-                className="input"
-                min="0"
-                max="13"
-                value={formData.level}
-                onChange={(e) => setFormData(f => ({ ...f, level: e.target.value }))}
-              />
-            </div>
-          </div>
+          {/* Monster-only fields */}
+          {isMonster && (
+            <>
+              <div className="form-row">
+                <div className="input-group">
+                  <label htmlFor="attribute">Attribute *</label>
+                  <select
+                    id="attribute"
+                    className="input"
+                    value={formData.attribute}
+                    onChange={(e) => setFormData(f => ({ ...f, attribute: e.target.value }))}
+                    required
+                  >
+                    {ATTRIBUTES.map(attr => (
+                      <option key={attr} value={attr}>{attr}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="input-group">
+                  <label htmlFor="level">
+                    {isLink ? 'Link Rating' : isPendulum ? 'Level/Rank & Scale' : 'Level/Rank'}
+                  </label>
+                  <input
+                    type="number"
+                    id="level"
+                    className="input"
+                    min="0"
+                    max="13"
+                    placeholder={isLink ? '1-6' : '1-12'}
+                    value={formData.level}
+                    onChange={(e) => setFormData(f => ({ ...f, level: e.target.value }))}
+                  />
+                </div>
+              </div>
 
-          <div className="form-row">
-            <div className="input-group">
-              <label htmlFor="atk">ATK</label>
-              <input
-                type="number"
-                id="atk"
-                className="input"
-                min="0"
-                value={formData.atk}
-                onChange={(e) => setFormData(f => ({ ...f, atk: e.target.value }))}
-              />
-            </div>
-            <div className="input-group">
-              <label htmlFor="def">DEF</label>
-              <input
-                type="number"
-                id="def"
-                className="input"
-                min="0"
-                value={formData.def}
-                onChange={(e) => setFormData(f => ({ ...f, def: e.target.value }))}
-              />
-            </div>
-          </div>
+              <div className="form-row">
+                <div className="input-group">
+                  <label htmlFor="atk">ATK</label>
+                  <input
+                    type="number"
+                    id="atk"
+                    className="input"
+                    min="0"
+                    step="50"
+                    placeholder="3000"
+                    value={formData.atk}
+                    onChange={(e) => setFormData(f => ({ ...f, atk: e.target.value }))}
+                  />
+                </div>
+                {!isLink && (
+                  <div className="input-group">
+                    <label htmlFor="def">DEF</label>
+                    <input
+                      type="number"
+                      id="def"
+                      className="input"
+                      min="0"
+                      step="50"
+                      placeholder="2500"
+                      value={formData.def}
+                      onChange={(e) => setFormData(f => ({ ...f, def: e.target.value }))}
+                    />
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </form>
       </Modal>
     </div>

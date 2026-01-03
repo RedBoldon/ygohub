@@ -32,7 +32,17 @@ export const createTournamentSchema = z.object({
         .int()
         .min(1, 'Must have at least 1 round')
         .optional(),
+    // Deck mode: 'player' = players bring own decks, 'organizer' = organizer assigns decks
+    deckMode: z.enum(['player', 'organizer']).default('player'),
+    // Collection ID for organizer deck mode
+    collectionId: z.number()
+        .int()
+        .positive()
+        .optional(),
 }).refine(
     data => !data.maxPlayerCount || !data.minPlayerCount || data.maxPlayerCount >= data.minPlayerCount,
     { message: 'Max players must be greater than or equal to min players', path: ['maxPlayerCount'] }
+).refine(
+    data => data.deckMode !== 'organizer' || data.collectionId,
+    { message: 'Collection is required when using organizer deck mode', path: ['collectionId'] }
 );

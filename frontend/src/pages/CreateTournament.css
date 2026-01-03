@@ -13,6 +13,86 @@
   padding-left: 2.75rem;
 }
 
+.tournament-form select.input {
+  padding-left: 2.75rem;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23a09080' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+}
+
+.new-series-input {
+  margin-top: -0.5rem;
+  padding-left: 1rem;
+  border-left: 3px solid var(--purple-primary);
+}
+
+.collection-select {
+  padding-left: 1rem;
+  border-left: 3px solid var(--gold-primary);
+}
+
+/* Deck Mode Options */
+.deck-mode-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.deck-mode-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--bg-tertiary);
+  border: 2px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.deck-mode-option:hover {
+  border-color: var(--border-medium);
+}
+
+.deck-mode-option.selected {
+  border-color: var(--gold-primary);
+  background: var(--gold-glow);
+}
+
+.deck-mode-option input[type="radio"] {
+  margin-top: 0.25rem;
+  accent-color: var(--gold-primary);
+}
+
+.option-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.option-title {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.option-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.warning-text {
+  font-size: 0.85rem;
+  color: var(--gold-primary);
+  margin-top: 0.5rem;
+}
+
+.warning-text .link {
+  color: var(--gold-light);
+  text-decoration: underline;
+}
+
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -29,7 +109,8 @@
 }
 
 @media (max-width: 480px) {
-  .form-row {
+  .form-row,
+  .deck-mode-options {
     grid-template-columns: 1fr;
   }
 }

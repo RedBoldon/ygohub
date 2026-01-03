@@ -1,11 +1,37 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Trophy, Calendar, Users, ChevronRight } from 'lucide-react';
+import { useToast } from '../hooks/useToast';
+import { api } from '../api/client';
+import { Plus, Trophy, Calendar, Users, ChevronRight, Crown } from 'lucide-react';
 import './Tournaments.css';
 
 export default function Tournaments() {
-  // TODO: Fetch user's tournaments from API
-  const [tournaments] = useState([]);
+  const [tournaments, setTournaments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const toast = useToast();
+
+  useEffect(() => {
+    loadTournaments();
+  }, []);
+
+  const loadTournaments = async () => {
+    try {
+      const data = await api.tournaments.list();
+      setTournaments(data.tournaments || []);
+    } catch (err) {
+      toast.error('Failed to load tournaments');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="spinner"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="container">
@@ -49,12 +75,27 @@ export default function Tournaments() {
               className="tournament-card"
             >
               <div className="tournament-info">
-                <h3 className="tournament-name">{tournament.name}</h3>
+                <div className="tournament-name-row">
+                  <h3 className="tournament-name">{tournament.name}</h3>
+                  {tournament.is_creator && (
+                    <span className="creator-badge" title="You created this tournament">
+                      <Crown size={14} />
+                    </span>
+                  )}
+                </div>
+                {tournament.series_name && (
+                  <span className="tournament-series">{tournament.series_name}</span>
+                )}
                 <div className="tournament-meta">
                   <span className="meta-item">
                     <Users size={14} />
                     {tournament.player_count}/{tournament.max_player_count || '∞'}
                   </span>
+                  {tournament.location && (
+                    <span className="meta-item location">
+                      {tournament.location}
+                    </span>
+                  )}
                   <span className="meta-item">
                     <Calendar size={14} />
                     {new Date(tournament.created_at).toLocaleDateString()}
@@ -63,8 +104,14 @@ export default function Tournaments() {
               </div>
               <div className="tournament-status">
                 <span className={`badge badge-${getStatusColor(tournament.status)}`}>
-                  {tournament.status}
+                  {formatStatus(tournament.status)}
                 </span>
+                {tournament.status === 'in_progress' && tournament.current_round && (
+                  <span className="round-info">
+                    Round {tournament.current_round}
+                    {tournament.number_of_rounds && `/${tournament.number_of_rounds}`}
+                  </span>
+                )}
                 <ChevronRight size={20} className="tournament-arrow" />
               </div>
             </Link>
@@ -82,5 +129,15 @@ function getStatusColor(status) {
     case 'completed': return 'gold';
     case 'cancelled': return 'red';
     default: return 'gold';
+  }
+}
+
+function formatStatus(status) {
+  switch (status) {
+    case 'open': return 'Open';
+    case 'in_progress': return 'In Progress';
+    case 'completed': return 'Completed';
+    case 'cancelled': return 'Cancelled';
+    default: return status;
   }
 }

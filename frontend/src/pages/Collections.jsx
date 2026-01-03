@@ -22,7 +22,7 @@ export default function Collections() {
 
   const loadCollections = async () => {
     try {
-      const data = await api.customCollections.list();
+      const data = await api.collections.list();
       setCollections(data.collections || []);
     } catch (err) {
       toast.error('Failed to load collections');
@@ -46,10 +46,10 @@ export default function Collections() {
 
     try {
       if (editCollection) {
-        await api.customCollections.update(editCollection.id, formData);
+        await api.collections.update(editCollection.id, formData);
         toast.success('Collection updated');
       } else {
-        await api.customCollections.create(formData.name, formData.description);
+        await api.collections.create(formData.name, formData.description);
         toast.success('Collection created');
       }
       setModalOpen(false);
@@ -62,10 +62,10 @@ export default function Collections() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this collection?')) return;
+    if (!confirm('Are you sure you want to delete this collection? All decks will be deleted.')) return;
 
     try {
-      await api.customCollections.delete(id);
+      await api.collections.delete(id);
       toast.success('Collection deleted');
       loadCollections();
     } catch (err) {
@@ -98,7 +98,7 @@ export default function Collections() {
         <div className="empty-state">
           <Layers size={64} />
           <h3>No Collections Yet</h3>
-          <p>Create a collection to start organizing your decks.</p>
+          <p>Create a collection to start building your decks.</p>
           <button className="btn btn-primary mt-3" onClick={() => openModal()}>
             Create Collection
           </button>
@@ -125,13 +125,13 @@ export default function Collections() {
               <div className="collection-actions">
                 <button 
                   className="btn btn-ghost btn-sm"
-                  onClick={() => openModal(collection)}
+                  onClick={(e) => { e.preventDefault(); openModal(collection); }}
                 >
                   <Edit2 size={16} />
                 </button>
                 <button 
                   className="btn btn-ghost btn-sm"
-                  onClick={() => handleDelete(collection.id)}
+                  onClick={(e) => { e.preventDefault(); handleDelete(collection.id); }}
                 >
                   <Trash2 size={16} />
                 </button>
@@ -168,7 +168,7 @@ export default function Collections() {
               type="text"
               id="name"
               className="input"
-              placeholder="My Custom Decks"
+              placeholder="My Tournament Decks"
               value={formData.name}
               onChange={(e) => setFormData(f => ({ ...f, name: e.target.value }))}
               minLength={2}

@@ -10,8 +10,8 @@ export async function createTournament(userId, data) {
 
     const result = await pool.query(
         `INSERT INTO tournaments 
-         (name, min_player_count, max_player_count, format_id, series_id, location, starting_time, created_by, invite_code, number_of_rounds)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+         (name, min_player_count, max_player_count, format_id, series_id, location, starting_time, created_by, invite_code, number_of_rounds, deck_mode, collection_id)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
          RETURNING *`,
         [
             data.name,
@@ -23,7 +23,9 @@ export async function createTournament(userId, data) {
             data.startingTime || null,
             userId,
             inviteCode,
-            data.numberOfRounds || null
+            data.numberOfRounds || null,
+            data.deckMode || 'player',
+            data.collectionId || null
         ]
     );
 
@@ -40,7 +42,9 @@ export async function createTournament(userId, data) {
         created_at: row.created_at,
         invite_code: row.invite_code,
         status: row.status,
-        number_of_rounds: row.number_of_rounds
+        number_of_rounds: row.number_of_rounds,
+        deck_mode: row.deck_mode,
+        collection_id: row.collection_id
     };
 }
 
@@ -87,11 +91,12 @@ export async function joinTournament(inviteCode, userId) {
 }
 
 export async function getTournamentById(tournamentId, requestingUserId = null) {
-    // Get tournament with format name
+    // Get tournament with format name and collection name
     const tournamentResult = await pool.query(
-        `SELECT t.*, tf.name as format_name
+        `SELECT t.*, tf.name as format_name, dc.name as collection_name
          FROM tournaments t
          LEFT JOIN tournament_formats tf ON t.format_id = tf.id
+         LEFT JOIN deck_collections dc ON t.collection_id = dc.id
          WHERE t.id = $1`,
         [tournamentId]
     );
@@ -99,11 +104,13 @@ export async function getTournamentById(tournamentId, requestingUserId = null) {
     const tournament = tournamentResult.rows[0];
     if (!tournament) return null;
 
-    // Get participants with usernames
+    // Get participants with usernames and assigned decks
     const participantsResult = await pool.query(
-        `SELECT u.id as user_id, u.username, u.tag, tp.joined_at
+        `SELECT u.id as user_id, u.username, u.tag, tp.joined_at, tp.assigned_deck_id,
+                cd.deck_name as assigned_deck_name
          FROM tournament_participants tp
          JOIN users u ON tp.user_id = u.id
+         LEFT JOIN collection_decks cd ON tp.assigned_deck_id = cd.id
          WHERE tp.tournament_id = $1
          ORDER BY tp.joined_at`,
         [tournamentId]
@@ -166,6 +173,16 @@ export async function getTournamentById(tournamentId, requestingUserId = null) {
     const isCreator = requestingUserId != null && requestingUserId === tournament.created_by;
     const isParticipant = participantsResult.rows.some(p => p.user_id === requestingUserId);
 
+    // Get available decks if organizer mode
+    let availableDecks = [];
+    if (tournament.deck_mode === 'organizer' && tournament.collection_id) {
+        const decksResult = await pool.query(
+            `SELECT id, deck_name, archetype FROM collection_decks WHERE collection_id = $1 ORDER BY deck_name`,
+            [tournament.collection_id]
+        );
+        availableDecks = decksResult.rows;
+    }
+
     return {
         tournament: {
             id: tournament.id,
@@ -180,11 +197,64 @@ export async function getTournamentById(tournamentId, requestingUserId = null) {
             status: tournament.status,
             current_round: tournament.current_round,
             number_of_rounds: tournament.number_of_rounds,
-            invite_code: isCreator ? tournament.invite_code : undefined
+            invite_code: isCreator ? tournament.invite_code : undefined,
+            deck_mode: tournament.deck_mode,
+            collection_id: tournament.collection_id,
+            collection_name: tournament.collection_name
         },
         participants: participantsResult.rows,
         rounds,
+        availableDecks,
         isCreator,
         isParticipant
     };
+}
+
+export async function assignDeckToPlayer(tournamentId, userId, playerId, deckId) {
+    // Verify tournament ownership
+    const tournamentCheck = await pool.query(
+        `SELECT created_by, deck_mode, collection_id FROM tournaments WHERE id = $1`,
+        [tournamentId]
+    );
+
+    if (tournamentCheck.rows.length === 0) {
+        throw new Error('Tournament not found');
+    }
+
+    const tournament = tournamentCheck.rows[0];
+
+    if (tournament.created_by !== userId) {
+        throw new Error('Only the creator can assign decks');
+    }
+
+    if (tournament.deck_mode !== 'organizer') {
+        throw new Error('Deck assignment is only available in organizer mode');
+    }
+
+    // Verify deck belongs to the tournament's collection
+    if (deckId) {
+        const deckCheck = await pool.query(
+            `SELECT id FROM collection_decks WHERE id = $1 AND collection_id = $2`,
+            [deckId, tournament.collection_id]
+        );
+
+        if (deckCheck.rows.length === 0) {
+            throw new Error('Deck not found in tournament collection');
+        }
+    }
+
+    // Update participant
+    const result = await pool.query(
+        `UPDATE tournament_participants 
+         SET assigned_deck_id = $1
+         WHERE tournament_id = $2 AND user_id = $3
+         RETURNING *`,
+        [deckId || null, tournamentId, playerId]
+    );
+
+    if (result.rows.length === 0) {
+        throw new Error('Player not found in tournament');
+    }
+
+    return result.rows[0];
 }

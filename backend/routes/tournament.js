@@ -1,11 +1,98 @@
 import { Router } from 'express';
 import { authMiddleware, optionalAuthMiddleware } from '../middleware/auth.js';
 import { createTournamentSchema } from '../validation/tournament.js';
-import { createTournament, joinTournament, getTournamentById } from '../tournament.js';
+import { createTournament, joinTournament, getTournamentById, assignDeckToPlayer } from '../tournament.js';
+import { selectPlayerDeck } from '../snapshot.js';
 import { startTournament, advanceRound, getTournamentData, calculateStandings } from '../swiss.js';
+import { pool } from '../db.js';
 
 const router = Router();
 
+// ------------------------------------------------------------------
+// TOURNAMENT SERIES
+// ------------------------------------------------------------------
+
+/**
+ * GET /tournaments/series
+ * Get all series for the user
+ */
+router.get('/series', authMiddleware, async (req, res) => {
+    try {
+        const result = await pool.query(
+            `SELECT id, name, created_at
+             FROM tournament_series
+             WHERE created_by = $1
+             ORDER BY name ASC`,
+            [req.user.userId]
+        );
+        res.json({ series: result.rows });
+    } catch (err) {
+        console.error('Get series error:', err);
+        res.status(500).json({ error: 'Failed to get series' });
+    }
+});
+
+/**
+ * POST /tournaments/series
+ * Create a new series
+ */
+router.post('/series', authMiddleware, async (req, res) => {
+    const { name } = req.body;
+
+    if (!name || name.trim().length < 2 || name.trim().length > 100) {
+        return res.status(400).json({ error: 'Series name must be between 2 and 100 characters' });
+    }
+
+    try {
+        const result = await pool.query(
+            `INSERT INTO tournament_series (name, created_by)
+             VALUES ($1, $2)
+             RETURNING *`,
+            [name.trim(), req.user.userId]
+        );
+        res.status(201).json({ series: result.rows[0] });
+    } catch (err) {
+        if (err.code === '23505') {
+            return res.status(409).json({ error: 'A series with this name already exists' });
+        }
+        console.error('Create series error:', err);
+        res.status(500).json({ error: 'Failed to create series' });
+    }
+});
+
+// ------------------------------------------------------------------
+// TOURNAMENTS LIST
+// ------------------------------------------------------------------
+
+/**
+ * GET /tournaments
+ * Get all tournaments where user is creator or participant
+ */
+router.get('/', authMiddleware, async (req, res) => {
+    try {
+        const result = await pool.query(
+            `SELECT DISTINCT t.id, t.name, t.status, t.player_count, t.max_player_count,
+                    t.location, t.created_at, t.current_round, t.number_of_rounds,
+                    ts.name as series_name,
+                    CASE WHEN t.created_by = $1 THEN true ELSE false END as is_creator
+             FROM tournaments t
+             LEFT JOIN tournament_series ts ON t.series_id = ts.id
+             LEFT JOIN tournament_participants tp ON t.id = tp.tournament_id
+             WHERE t.created_by = $1 OR tp.user_id = $1
+             ORDER BY t.created_at DESC`,
+            [req.user.userId]
+        );
+        res.json({ tournaments: result.rows });
+    } catch (err) {
+        console.error('Get tournaments error:', err);
+        res.status(500).json({ error: 'Failed to get tournaments' });
+    }
+});
+
+/**
+ * POST /tournaments
+ * Create a new tournament
+ */
 router.post('/', authMiddleware, async (req, res) => {
     const result = createTournamentSchema.safeParse(req.body);
 
@@ -125,7 +212,7 @@ router.post('/:id/advance', authMiddleware, async (req, res) => {
         const result = await advanceRound(tournamentId);
 
         if (result.completed) {
-            return res.json({ message: 'Tournament completed' });
+            return res.json({ message: 'Tournament completed', completed: true });
         }
 
         res.json({
@@ -251,6 +338,163 @@ router.post('/matches/:matchId/result', authMiddleware, async (req, res) => {
     }
 });
 
+// ------------------------------------------------------------------
+// DECK ASSIGNMENT
+// ------------------------------------------------------------------
+
+/**
+ * POST /tournaments/:id/assign-deck
+ * Assign a deck to a player (organizer mode only)
+ */
+router.post('/:id/assign-deck', authMiddleware, async (req, res) => {
+    const tournamentId = parseInt(req.params.id);
+    const { playerId, deckId } = req.body;
+
+    if (isNaN(tournamentId)) {
+        return res.status(400).json({ error: 'Invalid tournament ID' });
+    }
+
+    if (!playerId) {
+        return res.status(400).json({ error: 'Player ID is required' });
+    }
+
+    try {
+        const result = await assignDeckToPlayer(tournamentId, req.user.userId, playerId, deckId);
+        res.json({ message: 'Deck assigned', participant: result });
+    } catch (err) {
+        if (err.message === 'Tournament not found') {
+            return res.status(404).json({ error: err.message });
+        }
+        if (err.message === 'Only the creator can assign decks' ||
+            err.message === 'Deck assignment is only available in organizer mode' ||
+            err.message === 'Deck not found in tournament collection' ||
+            err.message === 'Player not found in tournament') {
+            return res.status(400).json({ error: err.message });
+        }
+        console.error('Assign deck error:', err);
+        res.status(500).json({ error: 'Failed to assign deck' });
+    }
+});
+
+// ------------------------------------------------------------------
+// PLAYER DECK SELECTION (Player Mode)
+// ------------------------------------------------------------------
+
+/**
+ * GET /tournaments/:id/my-decks
+ * Get player's available decks for selection (Player Mode)
+ */
+router.get('/:id/my-decks', authMiddleware, async (req, res) => {
+    const tournamentId = parseInt(req.params.id);
+
+    if (isNaN(tournamentId)) {
+        return res.status(400).json({ error: 'Invalid tournament ID' });
+    }
+
+    try {
+        // Verify tournament exists and is player mode
+        const tournament = await pool.query(
+            `SELECT deck_mode, status FROM tournaments WHERE id = $1`,
+            [tournamentId]
+        );
+
+        if (tournament.rows.length === 0) {
+            return res.status(404).json({ error: 'Tournament not found' });
+        }
+
+        if (tournament.rows[0].deck_mode !== 'player') {
+            return res.status(400).json({ error: 'This tournament uses organizer-provided decks' });
+        }
+
+        // Get player's decks from their collections
+        const decks = await pool.query(
+            `SELECT cd.id, cd.deck_name, cd.archetype, cd.description, dc.name as collection_name,
+                    (SELECT COUNT(*) FROM collection_deck_cards cdc WHERE cdc.deck_id = cd.id) as card_count
+             FROM collection_decks cd
+             JOIN deck_collections dc ON cd.collection_id = dc.id
+             WHERE dc.user_id = $1
+             ORDER BY dc.name, cd.deck_name`,
+            [req.user.userId]
+        );
+
+        // Check if player already selected a deck
+        const selected = await pool.query(
+            `SELECT tp.assigned_deck_id as deck_id, cd.deck_name
+             FROM tournament_participants tp
+             LEFT JOIN collection_decks cd ON tp.assigned_deck_id = cd.id
+             WHERE tp.tournament_id = $1 AND tp.user_id = $2`,
+            [tournamentId, req.user.userId]
+        );
+
+        const selectedDeck = selected.rows[0]?.deck_id 
+            ? { deck_id: selected.rows[0].deck_id, deck_name: selected.rows[0].deck_name }
+            : null;
+
+        res.json({
+            decks: decks.rows,
+            selectedDeck,
+            canChange: tournament.rows[0].status === 'open'
+        });
+    } catch (err) {
+        console.error('Get my decks error:', err);
+        res.status(500).json({ error: 'Failed to get decks' });
+    }
+});
+
+/**
+ * POST /tournaments/:id/select-deck
+ * Player selects their deck for the tournament (Player Mode)
+ */
+router.post('/:id/select-deck', authMiddleware, async (req, res) => {
+    const tournamentId = parseInt(req.params.id);
+    const { deckId } = req.body;
+
+    if (isNaN(tournamentId)) {
+        return res.status(400).json({ error: 'Invalid tournament ID' });
+    }
+
+    if (!deckId) {
+        return res.status(400).json({ error: 'Deck ID is required' });
+    }
+
+    try {
+        // Verify tournament
+        const tournament = await pool.query(
+            `SELECT deck_mode, status FROM tournaments WHERE id = $1`,
+            [tournamentId]
+        );
+
+        if (tournament.rows.length === 0) {
+            return res.status(404).json({ error: 'Tournament not found' });
+        }
+
+        const t = tournament.rows[0];
+
+        if (t.deck_mode !== 'player') {
+            return res.status(400).json({ error: 'This tournament uses organizer-provided decks' });
+        }
+
+        if (t.status !== 'open') {
+            return res.status(400).json({ error: 'Cannot change deck after tournament started' });
+        }
+
+        // Select deck (stores reference, snapshot created at tournament start)
+        const result = await selectPlayerDeck(tournamentId, req.user.userId, deckId);
+
+        res.json({ 
+            message: 'Deck selected', 
+            deckId: result.deckId,
+            deckName: result.deckName
+        });
+    } catch (err) {
+        if (err.message === 'Deck not found' || 
+            err.message === 'Deck does not belong to user' ||
+            err.message === 'Not a participant in this tournament') {
+            return res.status(400).json({ error: err.message });
+        }
+        console.error('Select deck error:', err);
+        res.status(500).json({ error: 'Failed to select deck' });
+    }
+});
 
 export default router;
-

@@ -31,6 +31,12 @@
   border-color: rgba(230, 126, 34, 0.5);
 }
 
+.custom-card-effect_pendulum,
+.custom-card-normal_pendulum {
+  border-color: rgba(39, 174, 96, 0.5);
+  background: linear-gradient(135deg, var(--bg-card) 50%, rgba(39, 174, 96, 0.05) 50%);
+}
+
 .custom-card-fusion,
 .custom-card-fusion_pendulum {
   border-color: rgba(142, 68, 173, 0.5);
@@ -94,6 +100,7 @@
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  white-space: pre-wrap;
 }
 
 .custom-card-stats {
@@ -135,6 +142,51 @@
 .custom-card-form textarea.input {
   resize: vertical;
   min-height: 80px;
+}
+
+/* Pendulum Effect Styling */
+.pendulum-effect-group,
+.monster-effect-group {
+  position: relative;
+}
+
+.effect-label {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.25rem;
+}
+
+.pendulum-label {
+  background: rgba(39, 174, 96, 0.2);
+  color: #27ae60;
+}
+
+.monster-label {
+  background: rgba(230, 126, 34, 0.2);
+  color: #e67e22;
+}
+
+.pendulum-textarea {
+  border-left: 3px solid #27ae60 !important;
+}
+
+.monster-textarea {
+  border-left: 3px solid #e67e22 !important;
+}
+
+.pendulum-textarea:focus {
+  border-color: #27ae60 !important;
+  box-shadow: 0 0 0 2px rgba(39, 174, 96, 0.15) !important;
+}
+
+.monster-textarea:focus {
+  border-color: #e67e22 !important;
+  box-shadow: 0 0 0 2px rgba(230, 126, 34, 0.15) !important;
 }
 
 @media (max-width: 480px) {

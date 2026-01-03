@@ -1,4 +1,5 @@
 import { pool } from './db.js';
+import { snapshotAssignedDecks, snapshotPlayerDecks, snapshotCustomAssignedDecks } from './snapshot.js';
 
 /**
  * Berechnet die Anzahl Runden für ein Swiss-Turnier
@@ -274,6 +275,32 @@ export async function startTournament(tournamentId) {
     if (data.tournament.status !== 'open') throw new Error('Tournament is not open');
     if (data.tournament.playerCount < 2) throw new Error('Not enough players');
 
+    // Get tournament details for deck mode
+    const tournamentDetails = await pool.query(
+        `SELECT deck_mode, collection_id, custom_collection_id, series_id FROM tournaments WHERE id = $1`,
+        [tournamentId]
+    );
+    const { deck_mode, collection_id, custom_collection_id, series_id } = tournamentDetails.rows[0];
+
+    // Create snapshots based on deck mode
+    let snapshotInfo = null;
+    if (deck_mode === 'organizer') {
+        if (custom_collection_id) {
+            // Organizer mode with custom collection: snapshot including custom cards
+            snapshotInfo = await snapshotCustomAssignedDecks(tournamentId, custom_collection_id, series_id);
+            console.log(`Created custom collection snapshot with ${snapshotInfo.deckCount} decks and ${snapshotInfo.customCardsSnapshotted} custom cards`);
+        } else if (collection_id) {
+            // Organizer mode with standard collection: snapshot the entire collection
+            snapshotInfo = await snapshotAssignedDecks(tournamentId, collection_id, series_id);
+            console.log(`Created collection snapshot with ${snapshotInfo.deckCount} decks`);
+        }
+    } else if (deck_mode === 'player') {
+        // Player mode: snapshot each player's selected deck
+        // Note: Player mode currently only supports standard collections
+        snapshotInfo = await snapshotPlayerDecks(tournamentId, series_id);
+        console.log(`Created player deck snapshots: ${snapshotInfo.deckCount} decks`);
+    }
+
     // Turnier starten
     await pool.query(
         `UPDATE tournaments 
@@ -301,7 +328,7 @@ export async function startTournament(tournamentId) {
     const pairings = generatePairings(standings);
     await createMatches(tournamentId, roundId, pairings);
 
-    return { roundId, pairings };
+    return { roundId, pairings, snapshotInfo };
 }
 
 /**

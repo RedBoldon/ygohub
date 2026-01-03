@@ -26,17 +26,49 @@
   transform: translateX(4px);
 }
 
+.tournament-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.tournament-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
 .tournament-name {
   font-size: 1.1rem;
   font-family: var(--font-body);
   font-weight: 600;
   color: var(--text-primary);
+}
+
+.creator-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold-primary);
+}
+
+.tournament-series {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--purple-light);
+  background: rgba(107, 76, 154, 0.2);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
   margin-bottom: 0.5rem;
 }
 
 .tournament-meta {
   display: flex;
   gap: 1.5rem;
+  flex-wrap: wrap;
 }
 
 .meta-item {
@@ -47,10 +79,24 @@
   color: var(--text-secondary);
 }
 
+.meta-item.location {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .tournament-status {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.round-info {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
 }
 
 .tournament-arrow {
@@ -60,4 +106,52 @@
 
 .tournament-card:hover .tournament-arrow {
   color: var(--gold-primary);
+}
+
+/* Badge colors */
+.badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+}
+
+.badge-green {
+  background: rgba(39, 174, 96, 0.2);
+  color: #27ae60;
+}
+
+.badge-blue {
+  background: rgba(52, 152, 219, 0.2);
+  color: #3498db;
+}
+
+.badge-gold {
+  background: var(--gold-glow);
+  color: var(--gold-primary);
+}
+
+.badge-red {
+  background: rgba(231, 76, 60, 0.2);
+  color: #e74c3c;
+}
+
+@media (max-width: 640px) {
+  .tournament-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .tournament-status {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .tournament-meta {
+    gap: 1rem;
+  }
 }

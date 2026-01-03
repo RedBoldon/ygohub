@@ -70,6 +70,12 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-bottom: 0.25rem;
+}
+
+.deck-card-count {
+  font-size: 0.8rem;
+  color: var(--text-muted);
 }
 
 .deck-arrow {
@@ -93,4 +99,173 @@
   .decks-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Header actions */
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+/* History Modal */
+.empty-state-small {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+}
+
+.empty-state-small h4 {
+  margin: 1rem 0 0.5rem;
+  color: var(--text-primary);
+}
+
+.empty-state-small p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.history-entry {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.history-tournament {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.history-tournament svg {
+  color: var(--gold-primary);
+  flex-shrink: 0;
+}
+
+.history-tournament-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.history-tournament-name:hover {
+  color: var(--gold-primary);
+}
+
+.badge-sm {
+  font-size: 0.65rem;
+  padding: 0.15rem 0.4rem;
+}
+
+.history-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.history-version {
+  font-weight: 600;
+  color: var(--gold-muted);
+}
+
+.history-decks {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+}
+
+.history-deck-count {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.history-deck-names {
+  margin-top: 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.history-changes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.history-change {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.history-change svg {
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+.history-change.added svg {
+  color: var(--success-primary);
+}
+
+.history-change.removed svg {
+  color: var(--error-primary);
+}
+
+.history-change.modified svg {
+  color: var(--gold-primary);
+}
+
+.change-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.change-item {
+  color: var(--text-secondary);
+}
+
+.change-item small {
+  color: var(--text-muted);
+}
+
+.history-no-changes {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.history-initial {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.history-card-count {
+  font-weight: 500;
+  color: var(--text-secondary);
 }

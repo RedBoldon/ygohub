@@ -2,8 +2,10 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 14.20 (Homebrew)
--- Dumped by pg_dump version 17.5
+\restrict qEa95UBhYiqmtIoEUzv7hlPhpHaPjJJ6cj6FpRnFBaeKaJLgfddyEXieXbBF2Ik
+
+-- Dumped from database version 17.7 (Homebrew)
+-- Dumped by pg_dump version 17.7 (Homebrew)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -18,18 +20,20 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: public; Type: SCHEMA; Schema: -; Owner: -
+-- Name: public; Type: SCHEMA; Schema: -; Owner: balduinberger
 --
 
 -- *not* creating schema, since initdb creates it
 
+
+ALTER SCHEMA public OWNER TO balduinberger;
 
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- Name: audit_logs; Type: TABLE; Schema: public; Owner: -
+-- Name: audit_logs; Type: TABLE; Schema: public; Owner: balduinberger
 --
 
 CREATE TABLE public.audit_logs (
@@ -47,8 +51,10 @@ CREATE TABLE public.audit_logs (
 );
 
 
+ALTER TABLE public.audit_logs OWNER TO balduinberger;
+
 --
--- Name: audit_logs_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: audit_logs_id_seq; Type: SEQUENCE; Schema: public; Owner: balduinberger
 --
 
 CREATE SEQUENCE public.audit_logs_id_seq
@@ -60,15 +66,17 @@ CREATE SEQUENCE public.audit_logs_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.audit_logs_id_seq OWNER TO balduinberger;
+
 --
--- Name: audit_logs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: audit_logs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: balduinberger
 --
 
 ALTER SEQUENCE public.audit_logs_id_seq OWNED BY public.audit_logs.id;
 
 
 --
--- Name: cards; Type: TABLE; Schema: public; Owner: -
+-- Name: cards; Type: TABLE; Schema: public; Owner: balduinberger
 --
 
 CREATE TABLE public.cards (
@@ -85,12 +93,15 @@ CREATE TABLE public.cards (
     level integer,
     attribute text,
     created_at timestamp without time zone DEFAULT now(),
+    pendulum_description text,
     CONSTRAINT cards_frametype_check CHECK ((frametype = ANY (ARRAY['spell'::text, 'effect'::text, 'normal'::text, 'link'::text, 'trap'::text, 'fusion'::text, 'effect_pendulum'::text, 'xyz'::text, 'synchro'::text, 'ritual'::text, 'skill'::text, 'token'::text, 'fusion_pendulum'::text, 'normal_pendulum'::text, 'synchro_pendulum'::text, 'xyz_pendulum'::text, 'ritual_pendulum'::text])))
 );
 
 
+ALTER TABLE public.cards OWNER TO balduinberger;
+
 --
--- Name: collection_deck_cards; Type: TABLE; Schema: public; Owner: -
+-- Name: collection_deck_cards; Type: TABLE; Schema: public; Owner: balduinberger
 --
 
 CREATE TABLE public.collection_deck_cards (
@@ -103,8 +114,10 @@ CREATE TABLE public.collection_deck_cards (
 );
 
 
+ALTER TABLE public.collection_deck_cards OWNER TO balduinberger;
+
 --
--- Name: collection_decks; Type: TABLE; Schema: public; Owner: -
+-- Name: collection_decks; Type: TABLE; Schema: public; Owner: balduinberger
 --
 
 CREATE TABLE public.collection_decks (
@@ -119,8 +132,10 @@ CREATE TABLE public.collection_decks (
 );
 
 
+ALTER TABLE public.collection_decks OWNER TO balduinberger;
+
 --
--- Name: collection_decks_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: collection_decks_id_seq; Type: SEQUENCE; Schema: public; Owner: balduinberger
 --
 
 CREATE SEQUENCE public.collection_decks_id_seq
@@ -132,15 +147,17 @@ CREATE SEQUENCE public.collection_decks_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.collection_decks_id_seq OWNER TO balduinberger;
+
 --
--- Name: collection_decks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: collection_decks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: balduinberger
 --
 
 ALTER SEQUENCE public.collection_decks_id_seq OWNED BY public.collection_decks.id;
 
 
 --
--- Name: collection_snapshots; Type: TABLE; Schema: public; Owner: -
+-- Name: collection_snapshots; Type: TABLE; Schema: public; Owner: balduinberger
 --
 
 CREATE TABLE public.collection_snapshots (
@@ -160,8 +177,10 @@ CREATE TABLE public.collection_snapshots (
 );
 
 
+ALTER TABLE public.collection_snapshots OWNER TO balduinberger;
+
 --
--- Name: collection_snapshots_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: collection_snapshots_id_seq; Type: SEQUENCE; Schema: public; Owner: balduinberger
 --
 
 CREATE SEQUENCE public.collection_snapshots_id_seq
@@ -173,15 +192,268 @@ CREATE SEQUENCE public.collection_snapshots_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.collection_snapshots_id_seq OWNER TO balduinberger;
+
 --
--- Name: collection_snapshots_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: collection_snapshots_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: balduinberger
 --
 
 ALTER SEQUENCE public.collection_snapshots_id_seq OWNED BY public.collection_snapshots.id;
 
 
 --
--- Name: deck_collections; Type: TABLE; Schema: public; Owner: -
+-- Name: custom_cards; Type: TABLE; Schema: public; Owner: balduinberger
+--
+
+CREATE TABLE public.custom_cards (
+    id integer NOT NULL,
+    created_by integer,
+    origin_card_id bigint,
+    origin_custom_card_id integer,
+    origin_user_id integer,
+    name text NOT NULL,
+    type text NOT NULL,
+    humanreadablecardtype text NOT NULL,
+    frametype text NOT NULL,
+    description text NOT NULL,
+    race text NOT NULL,
+    archetype text,
+    atk integer,
+    def integer,
+    level integer,
+    attribute text,
+    version integer DEFAULT 1 NOT NULL,
+    created_at timestamp without time zone DEFAULT now(),
+    updated_at timestamp without time zone DEFAULT now(),
+    deleted_at timestamp without time zone,
+    CONSTRAINT custom_cards_frametype_check CHECK ((frametype = ANY (ARRAY['spell'::text, 'effect'::text, 'normal'::text, 'link'::text, 'trap'::text, 'fusion'::text, 'effect_pendulum'::text, 'xyz'::text, 'synchro'::text, 'ritual'::text, 'skill'::text, 'token'::text, 'fusion_pendulum'::text, 'normal_pendulum'::text, 'synchro_pendulum'::text, 'xyz_pendulum'::text, 'ritual_pendulum'::text]))),
+    CONSTRAINT custom_cards_version_check CHECK ((version > 0))
+);
+
+
+ALTER TABLE public.custom_cards OWNER TO balduinberger;
+
+--
+-- Name: custom_cards_id_seq; Type: SEQUENCE; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE public.custom_cards ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.custom_cards_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: custom_collection_deck_cards; Type: TABLE; Schema: public; Owner: balduinberger
+--
+
+CREATE TABLE public.custom_collection_deck_cards (
+    id integer NOT NULL,
+    deck_id integer NOT NULL,
+    card_id bigint,
+    custom_card_id integer,
+    quantity integer DEFAULT 1 NOT NULL,
+    deck_section text NOT NULL,
+    CONSTRAINT custom_collection_deck_cards_deck_section_check CHECK ((deck_section = ANY (ARRAY['main'::text, 'extra'::text, 'side'::text]))),
+    CONSTRAINT custom_collection_deck_cards_one_card CHECK ((((card_id IS NOT NULL) AND (custom_card_id IS NULL)) OR ((card_id IS NULL) AND (custom_card_id IS NOT NULL)))),
+    CONSTRAINT custom_collection_deck_cards_quantity_check CHECK (((quantity > 0) AND (quantity <= 3)))
+);
+
+
+ALTER TABLE public.custom_collection_deck_cards OWNER TO balduinberger;
+
+--
+-- Name: custom_collection_deck_cards_id_seq; Type: SEQUENCE; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE public.custom_collection_deck_cards ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.custom_collection_deck_cards_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: custom_collection_decks; Type: TABLE; Schema: public; Owner: balduinberger
+--
+
+CREATE TABLE public.custom_collection_decks (
+    id integer NOT NULL,
+    collection_id integer NOT NULL,
+    deck_name text NOT NULL,
+    archetype text,
+    description text,
+    created_at timestamp without time zone DEFAULT now(),
+    updated_at timestamp without time zone DEFAULT now(),
+    CONSTRAINT custom_collection_decks_deck_name_check CHECK (((length(deck_name) >= 2) AND (length(deck_name) <= 200)))
+);
+
+
+ALTER TABLE public.custom_collection_decks OWNER TO balduinberger;
+
+--
+-- Name: custom_collection_decks_id_seq; Type: SEQUENCE; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE public.custom_collection_decks ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.custom_collection_decks_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: custom_collection_snapshots; Type: TABLE; Schema: public; Owner: balduinberger
+--
+
+CREATE TABLE public.custom_collection_snapshots (
+    id integer NOT NULL,
+    source_collection_id integer,
+    parent_snapshot_id integer,
+    snapshot_type text NOT NULL,
+    series_id integer,
+    tournament_id integer,
+    collection_name text NOT NULL,
+    description text,
+    version_number integer DEFAULT 1,
+    created_at timestamp without time zone DEFAULT now(),
+    sync_locked boolean DEFAULT false,
+    CONSTRAINT custom_collection_snapshots_snapshot_type_check CHECK ((snapshot_type = ANY (ARRAY['series'::text, 'tournament'::text]))),
+    CONSTRAINT custom_collection_snapshots_type_check CHECK ((((snapshot_type = 'series'::text) AND (series_id IS NOT NULL) AND (tournament_id IS NULL)) OR ((snapshot_type = 'tournament'::text) AND (tournament_id IS NOT NULL)))),
+    CONSTRAINT custom_collection_snapshots_version_check CHECK ((version_number > 0))
+);
+
+
+ALTER TABLE public.custom_collection_snapshots OWNER TO balduinberger;
+
+--
+-- Name: custom_collection_snapshots_id_seq; Type: SEQUENCE; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE public.custom_collection_snapshots ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.custom_collection_snapshots_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: custom_deck_collections; Type: TABLE; Schema: public; Owner: balduinberger
+--
+
+CREATE TABLE public.custom_deck_collections (
+    id integer NOT NULL,
+    user_id integer NOT NULL,
+    name text NOT NULL,
+    description text,
+    created_at timestamp without time zone DEFAULT now(),
+    updated_at timestamp without time zone DEFAULT now(),
+    CONSTRAINT custom_deck_collections_name_check CHECK (((length(name) >= 2) AND (length(name) <= 200)))
+);
+
+
+ALTER TABLE public.custom_deck_collections OWNER TO balduinberger;
+
+--
+-- Name: custom_deck_collections_id_seq; Type: SEQUENCE; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE public.custom_deck_collections ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.custom_deck_collections_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: custom_snapshot_deck_cards; Type: TABLE; Schema: public; Owner: balduinberger
+--
+
+CREATE TABLE public.custom_snapshot_deck_cards (
+    id integer NOT NULL,
+    deck_id integer NOT NULL,
+    card_id bigint,
+    snapshot_custom_card_id integer,
+    quantity integer DEFAULT 1 NOT NULL,
+    deck_section text NOT NULL,
+    CONSTRAINT custom_snapshot_deck_cards_deck_section_check CHECK ((deck_section = ANY (ARRAY['main'::text, 'extra'::text, 'side'::text]))),
+    CONSTRAINT custom_snapshot_deck_cards_one_card CHECK ((((card_id IS NOT NULL) AND (snapshot_custom_card_id IS NULL)) OR ((card_id IS NULL) AND (snapshot_custom_card_id IS NOT NULL)))),
+    CONSTRAINT custom_snapshot_deck_cards_quantity_check CHECK (((quantity > 0) AND (quantity <= 3)))
+);
+
+
+ALTER TABLE public.custom_snapshot_deck_cards OWNER TO balduinberger;
+
+--
+-- Name: custom_snapshot_deck_cards_id_seq; Type: SEQUENCE; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE public.custom_snapshot_deck_cards ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.custom_snapshot_deck_cards_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: custom_snapshot_decks; Type: TABLE; Schema: public; Owner: balduinberger
+--
+
+CREATE TABLE public.custom_snapshot_decks (
+    id integer NOT NULL,
+    snapshot_id integer NOT NULL,
+    source_deck_id integer,
+    parent_deck_id integer,
+    deck_name text NOT NULL,
+    archetype text,
+    description text,
+    max_selections integer,
+    times_selected integer DEFAULT 0,
+    created_at timestamp without time zone DEFAULT now(),
+    CONSTRAINT custom_snapshot_decks_deck_name_check CHECK (((length(deck_name) >= 2) AND (length(deck_name) <= 200))),
+    CONSTRAINT custom_snapshot_decks_max_selections_check CHECK (((max_selections IS NULL) OR (max_selections > 0))),
+    CONSTRAINT custom_snapshot_decks_selection_limit CHECK (((max_selections IS NULL) OR (times_selected <= max_selections))),
+    CONSTRAINT custom_snapshot_decks_times_selected_check CHECK ((times_selected >= 0))
+);
+
+
+ALTER TABLE public.custom_snapshot_decks OWNER TO balduinberger;
+
+--
+-- Name: custom_snapshot_decks_id_seq; Type: SEQUENCE; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE public.custom_snapshot_decks ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.custom_snapshot_decks_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: deck_collections; Type: TABLE; Schema: public; Owner: balduinberger
 --
 
 CREATE TABLE public.deck_collections (
@@ -195,8 +467,10 @@ CREATE TABLE public.deck_collections (
 );
 
 
+ALTER TABLE public.deck_collections OWNER TO balduinberger;
+
 --
--- Name: deck_collections_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: deck_collections_id_seq; Type: SEQUENCE; Schema: public; Owner: balduinberger
 --
 
 CREATE SEQUENCE public.deck_collections_id_seq
@@ -208,15 +482,17 @@ CREATE SEQUENCE public.deck_collections_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.deck_collections_id_seq OWNER TO balduinberger;
+
 --
--- Name: deck_collections_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: deck_collections_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: balduinberger
 --
 
 ALTER SEQUENCE public.deck_collections_id_seq OWNED BY public.deck_collections.id;
 
 
 --
--- Name: match_participants; Type: TABLE; Schema: public; Owner: -
+-- Name: match_participants; Type: TABLE; Schema: public; Owner: balduinberger
 --
 
 CREATE TABLE public.match_participants (
@@ -231,8 +507,10 @@ CREATE TABLE public.match_participants (
 );
 
 
+ALTER TABLE public.match_participants OWNER TO balduinberger;
+
 --
--- Name: matches; Type: TABLE; Schema: public; Owner: -
+-- Name: matches; Type: TABLE; Schema: public; Owner: balduinberger
 --
 
 CREATE TABLE public.matches (
@@ -254,8 +532,10 @@ CREATE TABLE public.matches (
 );
 
 
+ALTER TABLE public.matches OWNER TO balduinberger;
+
 --
--- Name: matches_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: matches_id_seq; Type: SEQUENCE; Schema: public; Owner: balduinberger
 --
 
 CREATE SEQUENCE public.matches_id_seq
@@ -267,15 +547,17 @@ CREATE SEQUENCE public.matches_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.matches_id_seq OWNER TO balduinberger;
+
 --
--- Name: matches_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: matches_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: balduinberger
 --
 
 ALTER SEQUENCE public.matches_id_seq OWNED BY public.matches.id;
 
 
 --
--- Name: organizers; Type: TABLE; Schema: public; Owner: -
+-- Name: organizers; Type: TABLE; Schema: public; Owner: balduinberger
 --
 
 CREATE TABLE public.organizers (
@@ -290,8 +572,10 @@ CREATE TABLE public.organizers (
 );
 
 
+ALTER TABLE public.organizers OWNER TO balduinberger;
+
 --
--- Name: organizers_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: organizers_id_seq; Type: SEQUENCE; Schema: public; Owner: balduinberger
 --
 
 CREATE SEQUENCE public.organizers_id_seq
@@ -303,15 +587,17 @@ CREATE SEQUENCE public.organizers_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.organizers_id_seq OWNER TO balduinberger;
+
 --
--- Name: organizers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: organizers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: balduinberger
 --
 
 ALTER SEQUENCE public.organizers_id_seq OWNED BY public.organizers.id;
 
 
 --
--- Name: player_tournament_decks; Type: TABLE; Schema: public; Owner: -
+-- Name: player_tournament_decks; Type: TABLE; Schema: public; Owner: balduinberger
 --
 
 CREATE TABLE public.player_tournament_decks (
@@ -323,8 +609,10 @@ CREATE TABLE public.player_tournament_decks (
 );
 
 
+ALTER TABLE public.player_tournament_decks OWNER TO balduinberger;
+
 --
--- Name: player_tournament_decks_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: player_tournament_decks_id_seq; Type: SEQUENCE; Schema: public; Owner: balduinberger
 --
 
 CREATE SEQUENCE public.player_tournament_decks_id_seq
@@ -336,15 +624,17 @@ CREATE SEQUENCE public.player_tournament_decks_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.player_tournament_decks_id_seq OWNER TO balduinberger;
+
 --
--- Name: player_tournament_decks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: player_tournament_decks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: balduinberger
 --
 
 ALTER SEQUENCE public.player_tournament_decks_id_seq OWNED BY public.player_tournament_decks.id;
 
 
 --
--- Name: refresh_tokens; Type: TABLE; Schema: public; Owner: -
+-- Name: refresh_tokens; Type: TABLE; Schema: public; Owner: balduinberger
 --
 
 CREATE TABLE public.refresh_tokens (
@@ -356,8 +646,10 @@ CREATE TABLE public.refresh_tokens (
 );
 
 
+ALTER TABLE public.refresh_tokens OWNER TO balduinberger;
+
 --
--- Name: refresh_tokens_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: refresh_tokens_id_seq; Type: SEQUENCE; Schema: public; Owner: balduinberger
 --
 
 CREATE SEQUENCE public.refresh_tokens_id_seq
@@ -369,15 +661,58 @@ CREATE SEQUENCE public.refresh_tokens_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.refresh_tokens_id_seq OWNER TO balduinberger;
+
 --
--- Name: refresh_tokens_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: refresh_tokens_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: balduinberger
 --
 
 ALTER SEQUENCE public.refresh_tokens_id_seq OWNED BY public.refresh_tokens.id;
 
 
 --
--- Name: snapshot_deck_cards; Type: TABLE; Schema: public; Owner: -
+-- Name: snapshot_custom_cards; Type: TABLE; Schema: public; Owner: balduinberger
+--
+
+CREATE TABLE public.snapshot_custom_cards (
+    id integer NOT NULL,
+    snapshot_id integer NOT NULL,
+    source_custom_card_id integer,
+    name text NOT NULL,
+    type text NOT NULL,
+    humanreadablecardtype text NOT NULL,
+    frametype text NOT NULL,
+    description text NOT NULL,
+    race text NOT NULL,
+    archetype text,
+    atk integer,
+    def integer,
+    level integer,
+    attribute text,
+    version_at_snapshot integer NOT NULL,
+    created_at timestamp without time zone DEFAULT now(),
+    CONSTRAINT snapshot_custom_cards_frametype_check CHECK ((frametype = ANY (ARRAY['spell'::text, 'effect'::text, 'normal'::text, 'link'::text, 'trap'::text, 'fusion'::text, 'effect_pendulum'::text, 'xyz'::text, 'synchro'::text, 'ritual'::text, 'skill'::text, 'token'::text, 'fusion_pendulum'::text, 'normal_pendulum'::text, 'synchro_pendulum'::text, 'xyz_pendulum'::text, 'ritual_pendulum'::text])))
+);
+
+
+ALTER TABLE public.snapshot_custom_cards OWNER TO balduinberger;
+
+--
+-- Name: snapshot_custom_cards_id_seq; Type: SEQUENCE; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE public.snapshot_custom_cards ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.snapshot_custom_cards_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: snapshot_deck_cards; Type: TABLE; Schema: public; Owner: balduinberger
 --
 
 CREATE TABLE public.snapshot_deck_cards (
@@ -390,8 +725,10 @@ CREATE TABLE public.snapshot_deck_cards (
 );
 
 
+ALTER TABLE public.snapshot_deck_cards OWNER TO balduinberger;
+
 --
--- Name: snapshot_decks; Type: TABLE; Schema: public; Owner: -
+-- Name: snapshot_decks; Type: TABLE; Schema: public; Owner: balduinberger
 --
 
 CREATE TABLE public.snapshot_decks (
@@ -412,8 +749,10 @@ CREATE TABLE public.snapshot_decks (
 );
 
 
+ALTER TABLE public.snapshot_decks OWNER TO balduinberger;
+
 --
--- Name: snapshot_decks_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: snapshot_decks_id_seq; Type: SEQUENCE; Schema: public; Owner: balduinberger
 --
 
 CREATE SEQUENCE public.snapshot_decks_id_seq
@@ -425,15 +764,17 @@ CREATE SEQUENCE public.snapshot_decks_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.snapshot_decks_id_seq OWNER TO balduinberger;
+
 --
--- Name: snapshot_decks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: snapshot_decks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: balduinberger
 --
 
 ALTER SEQUENCE public.snapshot_decks_id_seq OWNED BY public.snapshot_decks.id;
 
 
 --
--- Name: tournament_formats; Type: TABLE; Schema: public; Owner: -
+-- Name: tournament_formats; Type: TABLE; Schema: public; Owner: balduinberger
 --
 
 CREATE TABLE public.tournament_formats (
@@ -447,8 +788,10 @@ CREATE TABLE public.tournament_formats (
 );
 
 
+ALTER TABLE public.tournament_formats OWNER TO balduinberger;
+
 --
--- Name: tournament_formats_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: tournament_formats_id_seq; Type: SEQUENCE; Schema: public; Owner: balduinberger
 --
 
 CREATE SEQUENCE public.tournament_formats_id_seq
@@ -460,27 +803,32 @@ CREATE SEQUENCE public.tournament_formats_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.tournament_formats_id_seq OWNER TO balduinberger;
+
 --
--- Name: tournament_formats_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: tournament_formats_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: balduinberger
 --
 
 ALTER SEQUENCE public.tournament_formats_id_seq OWNED BY public.tournament_formats.id;
 
 
 --
--- Name: tournament_participants; Type: TABLE; Schema: public; Owner: -
+-- Name: tournament_participants; Type: TABLE; Schema: public; Owner: balduinberger
 --
 
 CREATE TABLE public.tournament_participants (
     id integer NOT NULL,
     tournament_id integer,
     user_id integer,
-    joined_at timestamp without time zone DEFAULT now()
+    joined_at timestamp without time zone DEFAULT now(),
+    assigned_deck_id integer
 );
 
 
+ALTER TABLE public.tournament_participants OWNER TO balduinberger;
+
 --
--- Name: tournament_participants_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: tournament_participants_id_seq; Type: SEQUENCE; Schema: public; Owner: balduinberger
 --
 
 CREATE SEQUENCE public.tournament_participants_id_seq
@@ -492,15 +840,17 @@ CREATE SEQUENCE public.tournament_participants_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.tournament_participants_id_seq OWNER TO balduinberger;
+
 --
--- Name: tournament_participants_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: tournament_participants_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: balduinberger
 --
 
 ALTER SEQUENCE public.tournament_participants_id_seq OWNED BY public.tournament_participants.id;
 
 
 --
--- Name: tournament_rounds; Type: TABLE; Schema: public; Owner: -
+-- Name: tournament_rounds; Type: TABLE; Schema: public; Owner: balduinberger
 --
 
 CREATE TABLE public.tournament_rounds (
@@ -517,8 +867,10 @@ CREATE TABLE public.tournament_rounds (
 );
 
 
+ALTER TABLE public.tournament_rounds OWNER TO balduinberger;
+
 --
--- Name: tournament_rounds_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: tournament_rounds_id_seq; Type: SEQUENCE; Schema: public; Owner: balduinberger
 --
 
 CREATE SEQUENCE public.tournament_rounds_id_seq
@@ -530,32 +882,37 @@ CREATE SEQUENCE public.tournament_rounds_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.tournament_rounds_id_seq OWNER TO balduinberger;
+
 --
--- Name: tournament_rounds_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: tournament_rounds_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: balduinberger
 --
 
 ALTER SEQUENCE public.tournament_rounds_id_seq OWNED BY public.tournament_rounds.id;
 
 
 --
--- Name: tournament_series; Type: TABLE; Schema: public; Owner: -
+-- Name: tournament_series; Type: TABLE; Schema: public; Owner: balduinberger
 --
 
 CREATE TABLE public.tournament_series (
     id integer NOT NULL,
     name text NOT NULL,
-    organizer_id integer NOT NULL,
-    country_codes text[] NOT NULL,
+    organizer_id integer,
+    country_codes text[],
     created_at timestamp without time zone DEFAULT now(),
     last_tournament_at timestamp without time zone,
+    created_by integer,
     CONSTRAINT tournament_series_check CHECK (((last_tournament_at IS NULL) OR (last_tournament_at >= created_at))),
-    CONSTRAINT tournament_series_country_codes_check CHECK ((array_length(country_codes, 1) > 0)),
-    CONSTRAINT tournament_series_country_codes_check1 CHECK ((country_codes <@ ARRAY['US'::text, 'CA'::text, 'MX'::text, 'GB'::text, 'DE'::text, 'FR'::text, 'IT'::text, 'ES'::text, 'NL'::text, 'BE'::text, 'CH'::text, 'AT'::text, 'PT'::text, 'SE'::text, 'NO'::text, 'DK'::text, 'FI'::text, 'IE'::text, 'PL'::text, 'CZ'::text, 'GR'::text, 'JP'::text, 'KR'::text, 'CN'::text, 'TW'::text, 'HK'::text, 'SG'::text, 'MY'::text, 'TH'::text, 'PH'::text, 'ID'::text, 'VN'::text, 'IN'::text, 'AU'::text, 'NZ'::text, 'BR'::text, 'AR'::text, 'CL'::text, 'CO'::text, 'PE'::text, 'ZA'::text, 'EG'::text, 'RU'::text, 'TR'::text, 'IL'::text, 'AE'::text, 'SA'::text]))
+    CONSTRAINT tournament_series_country_codes_valid CHECK (((country_codes IS NULL) OR (array_length(country_codes, 1) IS NULL) OR (country_codes <@ ARRAY['US'::text, 'CA'::text, 'MX'::text, 'GB'::text, 'DE'::text, 'FR'::text, 'IT'::text, 'ES'::text, 'NL'::text, 'BE'::text, 'CH'::text, 'AT'::text, 'PT'::text, 'SE'::text, 'NO'::text, 'DK'::text, 'FI'::text, 'IE'::text, 'PL'::text, 'CZ'::text, 'GR'::text, 'JP'::text, 'KR'::text, 'CN'::text, 'TW'::text, 'HK'::text, 'SG'::text, 'MY'::text, 'TH'::text, 'PH'::text, 'ID'::text, 'VN'::text, 'IN'::text, 'AU'::text, 'NZ'::text, 'BR'::text, 'AR'::text, 'CL'::text, 'CO'::text, 'PE'::text, 'ZA'::text, 'EG'::text, 'RU'::text, 'TR'::text, 'IL'::text, 'AE'::text, 'SA'::text]))),
+    CONSTRAINT tournament_series_owner_check CHECK (((created_by IS NOT NULL) OR (organizer_id IS NOT NULL)))
 );
 
 
+ALTER TABLE public.tournament_series OWNER TO balduinberger;
+
 --
--- Name: tournament_series_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: tournament_series_id_seq; Type: SEQUENCE; Schema: public; Owner: balduinberger
 --
 
 CREATE SEQUENCE public.tournament_series_id_seq
@@ -567,15 +924,17 @@ CREATE SEQUENCE public.tournament_series_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.tournament_series_id_seq OWNER TO balduinberger;
+
 --
--- Name: tournament_series_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: tournament_series_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: balduinberger
 --
 
 ALTER SEQUENCE public.tournament_series_id_seq OWNED BY public.tournament_series.id;
 
 
 --
--- Name: tournaments; Type: TABLE; Schema: public; Owner: -
+-- Name: tournaments; Type: TABLE; Schema: public; Owner: balduinberger
 --
 
 CREATE TABLE public.tournaments (
@@ -594,10 +953,13 @@ CREATE TABLE public.tournaments (
     status text DEFAULT 'open'::text NOT NULL,
     current_round integer DEFAULT 0 NOT NULL,
     number_of_rounds integer,
+    deck_mode text DEFAULT 'player'::text,
+    collection_id integer,
     CONSTRAINT tournaments_check CHECK ((max_player_count >= min_player_count)),
     CONSTRAINT tournaments_check1 CHECK (((max_player_count IS NULL) OR (player_count <= max_player_count))),
     CONSTRAINT tournaments_check2 CHECK (((starting_time IS NULL) OR (starting_time > created_at))),
     CONSTRAINT tournaments_current_round_check CHECK ((current_round >= 0)),
+    CONSTRAINT tournaments_deck_mode_check CHECK ((deck_mode = ANY (ARRAY['player'::text, 'organizer'::text]))),
     CONSTRAINT tournaments_max_player_count_check CHECK ((max_player_count > 0)),
     CONSTRAINT tournaments_min_player_count_check CHECK ((min_player_count > 0)),
     CONSTRAINT tournaments_number_of_rounds_check CHECK (((number_of_rounds IS NULL) OR (number_of_rounds > 0))),
@@ -606,8 +968,10 @@ CREATE TABLE public.tournaments (
 );
 
 
+ALTER TABLE public.tournaments OWNER TO balduinberger;
+
 --
--- Name: tournaments_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: tournaments_id_seq; Type: SEQUENCE; Schema: public; Owner: balduinberger
 --
 
 CREATE SEQUENCE public.tournaments_id_seq
@@ -619,15 +983,17 @@ CREATE SEQUENCE public.tournaments_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.tournaments_id_seq OWNER TO balduinberger;
+
 --
--- Name: tournaments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: tournaments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: balduinberger
 --
 
 ALTER SEQUENCE public.tournaments_id_seq OWNED BY public.tournaments.id;
 
 
 --
--- Name: user_organizations; Type: TABLE; Schema: public; Owner: -
+-- Name: user_organizations; Type: TABLE; Schema: public; Owner: balduinberger
 --
 
 CREATE TABLE public.user_organizations (
@@ -640,8 +1006,10 @@ CREATE TABLE public.user_organizations (
 );
 
 
+ALTER TABLE public.user_organizations OWNER TO balduinberger;
+
 --
--- Name: users; Type: TABLE; Schema: public; Owner: -
+-- Name: users; Type: TABLE; Schema: public; Owner: balduinberger
 --
 
 CREATE TABLE public.users (
@@ -661,8 +1029,10 @@ CREATE TABLE public.users (
 );
 
 
+ALTER TABLE public.users OWNER TO balduinberger;
+
 --
--- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: balduinberger
 --
 
 CREATE SEQUENCE public.users_id_seq
@@ -674,120 +1044,122 @@ CREATE SEQUENCE public.users_id_seq
     CACHE 1;
 
 
+ALTER SEQUENCE public.users_id_seq OWNER TO balduinberger;
+
 --
--- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: balduinberger
 --
 
 ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
--- Name: audit_logs id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: audit_logs id; Type: DEFAULT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.audit_logs ALTER COLUMN id SET DEFAULT nextval('public.audit_logs_id_seq'::regclass);
 
 
 --
--- Name: collection_decks id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: collection_decks id; Type: DEFAULT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.collection_decks ALTER COLUMN id SET DEFAULT nextval('public.collection_decks_id_seq'::regclass);
 
 
 --
--- Name: collection_snapshots id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: collection_snapshots id; Type: DEFAULT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.collection_snapshots ALTER COLUMN id SET DEFAULT nextval('public.collection_snapshots_id_seq'::regclass);
 
 
 --
--- Name: deck_collections id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: deck_collections id; Type: DEFAULT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.deck_collections ALTER COLUMN id SET DEFAULT nextval('public.deck_collections_id_seq'::regclass);
 
 
 --
--- Name: matches id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: matches id; Type: DEFAULT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.matches ALTER COLUMN id SET DEFAULT nextval('public.matches_id_seq'::regclass);
 
 
 --
--- Name: organizers id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: organizers id; Type: DEFAULT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.organizers ALTER COLUMN id SET DEFAULT nextval('public.organizers_id_seq'::regclass);
 
 
 --
--- Name: player_tournament_decks id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: player_tournament_decks id; Type: DEFAULT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.player_tournament_decks ALTER COLUMN id SET DEFAULT nextval('public.player_tournament_decks_id_seq'::regclass);
 
 
 --
--- Name: refresh_tokens id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: refresh_tokens id; Type: DEFAULT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.refresh_tokens ALTER COLUMN id SET DEFAULT nextval('public.refresh_tokens_id_seq'::regclass);
 
 
 --
--- Name: snapshot_decks id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: snapshot_decks id; Type: DEFAULT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.snapshot_decks ALTER COLUMN id SET DEFAULT nextval('public.snapshot_decks_id_seq'::regclass);
 
 
 --
--- Name: tournament_formats id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: tournament_formats id; Type: DEFAULT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.tournament_formats ALTER COLUMN id SET DEFAULT nextval('public.tournament_formats_id_seq'::regclass);
 
 
 --
--- Name: tournament_participants id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: tournament_participants id; Type: DEFAULT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.tournament_participants ALTER COLUMN id SET DEFAULT nextval('public.tournament_participants_id_seq'::regclass);
 
 
 --
--- Name: tournament_rounds id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: tournament_rounds id; Type: DEFAULT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.tournament_rounds ALTER COLUMN id SET DEFAULT nextval('public.tournament_rounds_id_seq'::regclass);
 
 
 --
--- Name: tournament_series id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: tournament_series id; Type: DEFAULT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.tournament_series ALTER COLUMN id SET DEFAULT nextval('public.tournament_series_id_seq'::regclass);
 
 
 --
--- Name: tournaments id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: tournaments id; Type: DEFAULT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.tournaments ALTER COLUMN id SET DEFAULT nextval('public.tournaments_id_seq'::regclass);
 
 
 --
--- Name: users id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: users id; Type: DEFAULT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
 
 
 --
--- Name: audit_logs audit_logs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: audit_logs audit_logs_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.audit_logs
@@ -795,7 +1167,7 @@ ALTER TABLE ONLY public.audit_logs
 
 
 --
--- Name: cards cards_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: cards cards_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.cards
@@ -803,7 +1175,7 @@ ALTER TABLE ONLY public.cards
 
 
 --
--- Name: collection_deck_cards collection_deck_cards_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: collection_deck_cards collection_deck_cards_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.collection_deck_cards
@@ -811,7 +1183,7 @@ ALTER TABLE ONLY public.collection_deck_cards
 
 
 --
--- Name: collection_decks collection_decks_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: collection_decks collection_decks_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.collection_decks
@@ -819,7 +1191,7 @@ ALTER TABLE ONLY public.collection_decks
 
 
 --
--- Name: collection_snapshots collection_snapshots_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: collection_snapshots collection_snapshots_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.collection_snapshots
@@ -827,7 +1199,63 @@ ALTER TABLE ONLY public.collection_snapshots
 
 
 --
--- Name: deck_collections deck_collections_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: custom_cards custom_cards_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.custom_cards
+    ADD CONSTRAINT custom_cards_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: custom_collection_deck_cards custom_collection_deck_cards_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.custom_collection_deck_cards
+    ADD CONSTRAINT custom_collection_deck_cards_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: custom_collection_decks custom_collection_decks_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.custom_collection_decks
+    ADD CONSTRAINT custom_collection_decks_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: custom_collection_snapshots custom_collection_snapshots_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.custom_collection_snapshots
+    ADD CONSTRAINT custom_collection_snapshots_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: custom_deck_collections custom_deck_collections_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.custom_deck_collections
+    ADD CONSTRAINT custom_deck_collections_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: custom_snapshot_deck_cards custom_snapshot_deck_cards_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.custom_snapshot_deck_cards
+    ADD CONSTRAINT custom_snapshot_deck_cards_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: custom_snapshot_decks custom_snapshot_decks_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.custom_snapshot_decks
+    ADD CONSTRAINT custom_snapshot_decks_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: deck_collections deck_collections_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.deck_collections
@@ -835,7 +1263,7 @@ ALTER TABLE ONLY public.deck_collections
 
 
 --
--- Name: match_participants match_participants_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: match_participants match_participants_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.match_participants
@@ -843,7 +1271,7 @@ ALTER TABLE ONLY public.match_participants
 
 
 --
--- Name: matches matches_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: matches matches_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.matches
@@ -851,7 +1279,7 @@ ALTER TABLE ONLY public.matches
 
 
 --
--- Name: organizers organizers_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: organizers organizers_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.organizers
@@ -859,7 +1287,7 @@ ALTER TABLE ONLY public.organizers
 
 
 --
--- Name: player_tournament_decks player_tournament_decks_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: player_tournament_decks player_tournament_decks_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.player_tournament_decks
@@ -867,7 +1295,7 @@ ALTER TABLE ONLY public.player_tournament_decks
 
 
 --
--- Name: player_tournament_decks player_tournament_decks_tournament_id_user_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: player_tournament_decks player_tournament_decks_tournament_id_user_id_key; Type: CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.player_tournament_decks
@@ -875,7 +1303,7 @@ ALTER TABLE ONLY public.player_tournament_decks
 
 
 --
--- Name: refresh_tokens refresh_tokens_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: refresh_tokens refresh_tokens_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.refresh_tokens
@@ -883,7 +1311,15 @@ ALTER TABLE ONLY public.refresh_tokens
 
 
 --
--- Name: snapshot_deck_cards snapshot_deck_cards_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: snapshot_custom_cards snapshot_custom_cards_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.snapshot_custom_cards
+    ADD CONSTRAINT snapshot_custom_cards_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: snapshot_deck_cards snapshot_deck_cards_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.snapshot_deck_cards
@@ -891,7 +1327,7 @@ ALTER TABLE ONLY public.snapshot_deck_cards
 
 
 --
--- Name: snapshot_decks snapshot_decks_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: snapshot_decks snapshot_decks_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.snapshot_decks
@@ -899,7 +1335,7 @@ ALTER TABLE ONLY public.snapshot_decks
 
 
 --
--- Name: tournament_formats tournament_formats_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: tournament_formats tournament_formats_name_key; Type: CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.tournament_formats
@@ -907,7 +1343,7 @@ ALTER TABLE ONLY public.tournament_formats
 
 
 --
--- Name: tournament_formats tournament_formats_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: tournament_formats tournament_formats_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.tournament_formats
@@ -915,7 +1351,7 @@ ALTER TABLE ONLY public.tournament_formats
 
 
 --
--- Name: tournament_participants tournament_participants_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: tournament_participants tournament_participants_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.tournament_participants
@@ -923,7 +1359,7 @@ ALTER TABLE ONLY public.tournament_participants
 
 
 --
--- Name: tournament_participants tournament_participants_tournament_id_user_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: tournament_participants tournament_participants_tournament_id_user_id_key; Type: CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.tournament_participants
@@ -931,7 +1367,7 @@ ALTER TABLE ONLY public.tournament_participants
 
 
 --
--- Name: tournament_rounds tournament_rounds_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: tournament_rounds tournament_rounds_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.tournament_rounds
@@ -939,7 +1375,7 @@ ALTER TABLE ONLY public.tournament_rounds
 
 
 --
--- Name: tournament_rounds tournament_rounds_tournament_id_round_number_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: tournament_rounds tournament_rounds_tournament_id_round_number_key; Type: CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.tournament_rounds
@@ -947,7 +1383,7 @@ ALTER TABLE ONLY public.tournament_rounds
 
 
 --
--- Name: tournament_series tournament_series_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: tournament_series tournament_series_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.tournament_series
@@ -955,7 +1391,7 @@ ALTER TABLE ONLY public.tournament_series
 
 
 --
--- Name: tournaments tournaments_invite_code_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: tournaments tournaments_invite_code_key; Type: CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.tournaments
@@ -963,7 +1399,7 @@ ALTER TABLE ONLY public.tournaments
 
 
 --
--- Name: tournaments tournaments_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: tournaments tournaments_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.tournaments
@@ -971,7 +1407,7 @@ ALTER TABLE ONLY public.tournaments
 
 
 --
--- Name: user_organizations user_organizations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: user_organizations user_organizations_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.user_organizations
@@ -979,7 +1415,7 @@ ALTER TABLE ONLY public.user_organizations
 
 
 --
--- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.users
@@ -987,7 +1423,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.users
@@ -995,238 +1431,399 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: idx_cards_archetype; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_cards_archetype; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_cards_archetype ON public.cards USING btree (archetype);
 
 
 --
--- Name: idx_cards_attribute; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_cards_attribute; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_cards_attribute ON public.cards USING btree (attribute);
 
 
 --
--- Name: idx_cards_frametype; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_cards_frametype; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_cards_frametype ON public.cards USING btree (frametype);
 
 
 --
--- Name: idx_cards_level; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_cards_level; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_cards_level ON public.cards USING btree (level);
 
 
 --
--- Name: idx_cards_name; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_cards_name; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_cards_name ON public.cards USING btree (name);
 
 
 --
--- Name: idx_cards_race; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_cards_race; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_cards_race ON public.cards USING btree (race);
 
 
 --
--- Name: idx_cards_type; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_cards_type; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_cards_type ON public.cards USING btree (type);
 
 
 --
--- Name: idx_collection_deck_cards_card_id; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_collection_deck_cards_card_id; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_collection_deck_cards_card_id ON public.collection_deck_cards USING btree (card_id);
 
 
 --
--- Name: idx_collection_deck_cards_deck_id; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_collection_deck_cards_deck_id; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_collection_deck_cards_deck_id ON public.collection_deck_cards USING btree (deck_id);
 
 
 --
--- Name: idx_collection_decks_collection_id; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_collection_decks_collection_id; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_collection_decks_collection_id ON public.collection_decks USING btree (collection_id);
 
 
 --
--- Name: idx_collection_snapshots_parent; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_collection_snapshots_parent; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_collection_snapshots_parent ON public.collection_snapshots USING btree (parent_snapshot_id);
 
 
 --
--- Name: idx_collection_snapshots_series; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_collection_snapshots_series; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_collection_snapshots_series ON public.collection_snapshots USING btree (series_id);
 
 
 --
--- Name: idx_collection_snapshots_source_collection; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_collection_snapshots_source_collection; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_collection_snapshots_source_collection ON public.collection_snapshots USING btree (source_collection_id);
 
 
 --
--- Name: idx_collection_snapshots_tournament; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_collection_snapshots_tournament; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_collection_snapshots_tournament ON public.collection_snapshots USING btree (tournament_id);
 
 
 --
--- Name: idx_deck_collections_user_id; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_custom_cards_archetype; Type: INDEX; Schema: public; Owner: balduinberger
+--
+
+CREATE INDEX idx_custom_cards_archetype ON public.custom_cards USING btree (archetype);
+
+
+--
+-- Name: idx_custom_cards_created_by; Type: INDEX; Schema: public; Owner: balduinberger
+--
+
+CREATE INDEX idx_custom_cards_created_by ON public.custom_cards USING btree (created_by);
+
+
+--
+-- Name: idx_custom_cards_name; Type: INDEX; Schema: public; Owner: balduinberger
+--
+
+CREATE INDEX idx_custom_cards_name ON public.custom_cards USING btree (name);
+
+
+--
+-- Name: idx_custom_cards_origin_card; Type: INDEX; Schema: public; Owner: balduinberger
+--
+
+CREATE INDEX idx_custom_cards_origin_card ON public.custom_cards USING btree (origin_card_id);
+
+
+--
+-- Name: idx_custom_cards_origin_custom; Type: INDEX; Schema: public; Owner: balduinberger
+--
+
+CREATE INDEX idx_custom_cards_origin_custom ON public.custom_cards USING btree (origin_custom_card_id);
+
+
+--
+-- Name: idx_custom_collection_deck_cards_card_id; Type: INDEX; Schema: public; Owner: balduinberger
+--
+
+CREATE INDEX idx_custom_collection_deck_cards_card_id ON public.custom_collection_deck_cards USING btree (card_id);
+
+
+--
+-- Name: idx_custom_collection_deck_cards_custom_card_id; Type: INDEX; Schema: public; Owner: balduinberger
+--
+
+CREATE INDEX idx_custom_collection_deck_cards_custom_card_id ON public.custom_collection_deck_cards USING btree (custom_card_id);
+
+
+--
+-- Name: idx_custom_collection_deck_cards_deck_id; Type: INDEX; Schema: public; Owner: balduinberger
+--
+
+CREATE INDEX idx_custom_collection_deck_cards_deck_id ON public.custom_collection_deck_cards USING btree (deck_id);
+
+
+--
+-- Name: idx_custom_collection_deck_cards_unique; Type: INDEX; Schema: public; Owner: balduinberger
+--
+
+CREATE UNIQUE INDEX idx_custom_collection_deck_cards_unique ON public.custom_collection_deck_cards USING btree (deck_id, COALESCE(card_id, ('-1'::integer)::bigint), COALESCE(custom_card_id, '-1'::integer), deck_section);
+
+
+--
+-- Name: idx_custom_collection_decks_collection_id; Type: INDEX; Schema: public; Owner: balduinberger
+--
+
+CREATE INDEX idx_custom_collection_decks_collection_id ON public.custom_collection_decks USING btree (collection_id);
+
+
+--
+-- Name: idx_custom_collection_snapshots_series; Type: INDEX; Schema: public; Owner: balduinberger
+--
+
+CREATE INDEX idx_custom_collection_snapshots_series ON public.custom_collection_snapshots USING btree (series_id);
+
+
+--
+-- Name: idx_custom_collection_snapshots_source; Type: INDEX; Schema: public; Owner: balduinberger
+--
+
+CREATE INDEX idx_custom_collection_snapshots_source ON public.custom_collection_snapshots USING btree (source_collection_id);
+
+
+--
+-- Name: idx_custom_collection_snapshots_tournament; Type: INDEX; Schema: public; Owner: balduinberger
+--
+
+CREATE INDEX idx_custom_collection_snapshots_tournament ON public.custom_collection_snapshots USING btree (tournament_id);
+
+
+--
+-- Name: idx_custom_deck_collections_user_id; Type: INDEX; Schema: public; Owner: balduinberger
+--
+
+CREATE INDEX idx_custom_deck_collections_user_id ON public.custom_deck_collections USING btree (user_id);
+
+
+--
+-- Name: idx_custom_snapshot_deck_cards_deck_id; Type: INDEX; Schema: public; Owner: balduinberger
+--
+
+CREATE INDEX idx_custom_snapshot_deck_cards_deck_id ON public.custom_snapshot_deck_cards USING btree (deck_id);
+
+
+--
+-- Name: idx_custom_snapshot_deck_cards_unique; Type: INDEX; Schema: public; Owner: balduinberger
+--
+
+CREATE UNIQUE INDEX idx_custom_snapshot_deck_cards_unique ON public.custom_snapshot_deck_cards USING btree (deck_id, COALESCE(card_id, ('-1'::integer)::bigint), COALESCE(snapshot_custom_card_id, '-1'::integer), deck_section);
+
+
+--
+-- Name: idx_custom_snapshot_decks_snapshot_id; Type: INDEX; Schema: public; Owner: balduinberger
+--
+
+CREATE INDEX idx_custom_snapshot_decks_snapshot_id ON public.custom_snapshot_decks USING btree (snapshot_id);
+
+
+--
+-- Name: idx_custom_snapshot_decks_source; Type: INDEX; Schema: public; Owner: balduinberger
+--
+
+CREATE INDEX idx_custom_snapshot_decks_source ON public.custom_snapshot_decks USING btree (source_deck_id);
+
+
+--
+-- Name: idx_deck_collections_user_id; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_deck_collections_user_id ON public.deck_collections USING btree (user_id);
 
 
 --
--- Name: idx_match_participants_match_id; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_match_participants_match_id; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_match_participants_match_id ON public.match_participants USING btree (match_id);
 
 
 --
--- Name: idx_match_participants_player_id; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_match_participants_player_id; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_match_participants_player_id ON public.match_participants USING btree (player_id);
 
 
 --
--- Name: idx_matches_round_id; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_matches_round_id; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_matches_round_id ON public.matches USING btree (round_id);
 
 
 --
--- Name: idx_matches_tournament_id; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_matches_tournament_id; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_matches_tournament_id ON public.matches USING btree (tournament_id);
 
 
 --
--- Name: idx_player_tournament_decks_tournament; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_player_tournament_decks_tournament; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_player_tournament_decks_tournament ON public.player_tournament_decks USING btree (tournament_id);
 
 
 --
--- Name: idx_player_tournament_decks_user; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_player_tournament_decks_user; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_player_tournament_decks_user ON public.player_tournament_decks USING btree (user_id);
 
 
 --
--- Name: idx_refresh_tokens_token_hash; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_refresh_tokens_token_hash; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_refresh_tokens_token_hash ON public.refresh_tokens USING btree (token_hash);
 
 
 --
--- Name: idx_refresh_tokens_user_id; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_refresh_tokens_user_id; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_refresh_tokens_user_id ON public.refresh_tokens USING btree (user_id);
 
 
 --
--- Name: idx_snapshot_deck_cards_deck_id; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_snapshot_custom_cards_snapshot_id; Type: INDEX; Schema: public; Owner: balduinberger
+--
+
+CREATE INDEX idx_snapshot_custom_cards_snapshot_id ON public.snapshot_custom_cards USING btree (snapshot_id);
+
+
+--
+-- Name: idx_snapshot_custom_cards_source; Type: INDEX; Schema: public; Owner: balduinberger
+--
+
+CREATE INDEX idx_snapshot_custom_cards_source ON public.snapshot_custom_cards USING btree (source_custom_card_id);
+
+
+--
+-- Name: idx_snapshot_deck_cards_deck_id; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_snapshot_deck_cards_deck_id ON public.snapshot_deck_cards USING btree (deck_id);
 
 
 --
--- Name: idx_snapshot_decks_snapshot_id; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_snapshot_decks_snapshot_id; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_snapshot_decks_snapshot_id ON public.snapshot_decks USING btree (snapshot_id);
 
 
 --
--- Name: idx_snapshot_decks_source_deck; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_snapshot_decks_source_deck; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_snapshot_decks_source_deck ON public.snapshot_decks USING btree (source_deck_id);
 
 
 --
--- Name: idx_tournament_rounds_status; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_tournament_participants_deck; Type: INDEX; Schema: public; Owner: balduinberger
+--
+
+CREATE INDEX idx_tournament_participants_deck ON public.tournament_participants USING btree (assigned_deck_id);
+
+
+--
+-- Name: idx_tournament_rounds_status; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_tournament_rounds_status ON public.tournament_rounds USING btree (status);
 
 
 --
--- Name: idx_tournament_rounds_tournament_id; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_tournament_rounds_tournament_id; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_tournament_rounds_tournament_id ON public.tournament_rounds USING btree (tournament_id);
 
 
 --
--- Name: idx_tournament_series_organizer_id; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_tournament_series_created_by; Type: INDEX; Schema: public; Owner: balduinberger
+--
+
+CREATE INDEX idx_tournament_series_created_by ON public.tournament_series USING btree (created_by);
+
+
+--
+-- Name: idx_tournament_series_organizer_id; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_tournament_series_organizer_id ON public.tournament_series USING btree (organizer_id);
 
 
 --
--- Name: idx_tournaments_format_id; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_tournaments_collection; Type: INDEX; Schema: public; Owner: balduinberger
+--
+
+CREATE INDEX idx_tournaments_collection ON public.tournaments USING btree (collection_id);
+
+
+--
+-- Name: idx_tournaments_format_id; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_tournaments_format_id ON public.tournaments USING btree (format_id);
 
 
 --
--- Name: idx_tournaments_series_id; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_tournaments_series_id; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_tournaments_series_id ON public.tournaments USING btree (series_id);
 
 
 --
--- Name: idx_tournaments_status; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_tournaments_status; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE INDEX idx_tournaments_status ON public.tournaments USING btree (status);
 
 
 --
--- Name: username_tag_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: username_tag_idx; Type: INDEX; Schema: public; Owner: balduinberger
 --
 
 CREATE UNIQUE INDEX username_tag_idx ON public.users USING btree (username, tag);
 
 
 --
--- Name: audit_logs audit_logs_performed_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: audit_logs audit_logs_performed_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.audit_logs
@@ -1234,7 +1831,7 @@ ALTER TABLE ONLY public.audit_logs
 
 
 --
--- Name: collection_deck_cards collection_deck_cards_card_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: collection_deck_cards collection_deck_cards_card_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.collection_deck_cards
@@ -1242,7 +1839,7 @@ ALTER TABLE ONLY public.collection_deck_cards
 
 
 --
--- Name: collection_deck_cards collection_deck_cards_deck_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: collection_deck_cards collection_deck_cards_deck_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.collection_deck_cards
@@ -1250,7 +1847,7 @@ ALTER TABLE ONLY public.collection_deck_cards
 
 
 --
--- Name: collection_decks collection_decks_collection_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: collection_decks collection_decks_collection_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.collection_decks
@@ -1258,7 +1855,7 @@ ALTER TABLE ONLY public.collection_decks
 
 
 --
--- Name: collection_snapshots collection_snapshots_parent_snapshot_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: collection_snapshots collection_snapshots_parent_snapshot_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.collection_snapshots
@@ -1266,7 +1863,7 @@ ALTER TABLE ONLY public.collection_snapshots
 
 
 --
--- Name: collection_snapshots collection_snapshots_series_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: collection_snapshots collection_snapshots_series_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.collection_snapshots
@@ -1274,7 +1871,7 @@ ALTER TABLE ONLY public.collection_snapshots
 
 
 --
--- Name: collection_snapshots collection_snapshots_source_collection_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: collection_snapshots collection_snapshots_source_collection_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.collection_snapshots
@@ -1282,7 +1879,7 @@ ALTER TABLE ONLY public.collection_snapshots
 
 
 --
--- Name: collection_snapshots collection_snapshots_tournament_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: collection_snapshots collection_snapshots_tournament_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.collection_snapshots
@@ -1290,7 +1887,159 @@ ALTER TABLE ONLY public.collection_snapshots
 
 
 --
--- Name: deck_collections deck_collections_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: custom_cards custom_cards_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.custom_cards
+    ADD CONSTRAINT custom_cards_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: custom_cards custom_cards_origin_card_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.custom_cards
+    ADD CONSTRAINT custom_cards_origin_card_id_fkey FOREIGN KEY (origin_card_id) REFERENCES public.cards(id);
+
+
+--
+-- Name: custom_cards custom_cards_origin_custom_card_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.custom_cards
+    ADD CONSTRAINT custom_cards_origin_custom_card_id_fkey FOREIGN KEY (origin_custom_card_id) REFERENCES public.custom_cards(id);
+
+
+--
+-- Name: custom_cards custom_cards_origin_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.custom_cards
+    ADD CONSTRAINT custom_cards_origin_user_id_fkey FOREIGN KEY (origin_user_id) REFERENCES public.users(id);
+
+
+--
+-- Name: custom_collection_deck_cards custom_collection_deck_cards_card_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.custom_collection_deck_cards
+    ADD CONSTRAINT custom_collection_deck_cards_card_id_fkey FOREIGN KEY (card_id) REFERENCES public.cards(id);
+
+
+--
+-- Name: custom_collection_deck_cards custom_collection_deck_cards_custom_card_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.custom_collection_deck_cards
+    ADD CONSTRAINT custom_collection_deck_cards_custom_card_id_fkey FOREIGN KEY (custom_card_id) REFERENCES public.custom_cards(id);
+
+
+--
+-- Name: custom_collection_deck_cards custom_collection_deck_cards_deck_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.custom_collection_deck_cards
+    ADD CONSTRAINT custom_collection_deck_cards_deck_id_fkey FOREIGN KEY (deck_id) REFERENCES public.custom_collection_decks(id) ON DELETE CASCADE;
+
+
+--
+-- Name: custom_collection_decks custom_collection_decks_collection_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.custom_collection_decks
+    ADD CONSTRAINT custom_collection_decks_collection_id_fkey FOREIGN KEY (collection_id) REFERENCES public.custom_deck_collections(id) ON DELETE CASCADE;
+
+
+--
+-- Name: custom_collection_snapshots custom_collection_snapshots_parent_snapshot_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.custom_collection_snapshots
+    ADD CONSTRAINT custom_collection_snapshots_parent_snapshot_id_fkey FOREIGN KEY (parent_snapshot_id) REFERENCES public.custom_collection_snapshots(id);
+
+
+--
+-- Name: custom_collection_snapshots custom_collection_snapshots_series_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.custom_collection_snapshots
+    ADD CONSTRAINT custom_collection_snapshots_series_id_fkey FOREIGN KEY (series_id) REFERENCES public.tournament_series(id);
+
+
+--
+-- Name: custom_collection_snapshots custom_collection_snapshots_source_collection_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.custom_collection_snapshots
+    ADD CONSTRAINT custom_collection_snapshots_source_collection_id_fkey FOREIGN KEY (source_collection_id) REFERENCES public.custom_deck_collections(id);
+
+
+--
+-- Name: custom_collection_snapshots custom_collection_snapshots_tournament_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.custom_collection_snapshots
+    ADD CONSTRAINT custom_collection_snapshots_tournament_id_fkey FOREIGN KEY (tournament_id) REFERENCES public.tournaments(id);
+
+
+--
+-- Name: custom_deck_collections custom_deck_collections_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.custom_deck_collections
+    ADD CONSTRAINT custom_deck_collections_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: custom_snapshot_deck_cards custom_snapshot_deck_cards_card_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.custom_snapshot_deck_cards
+    ADD CONSTRAINT custom_snapshot_deck_cards_card_id_fkey FOREIGN KEY (card_id) REFERENCES public.cards(id);
+
+
+--
+-- Name: custom_snapshot_deck_cards custom_snapshot_deck_cards_deck_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.custom_snapshot_deck_cards
+    ADD CONSTRAINT custom_snapshot_deck_cards_deck_id_fkey FOREIGN KEY (deck_id) REFERENCES public.custom_snapshot_decks(id) ON DELETE CASCADE;
+
+
+--
+-- Name: custom_snapshot_deck_cards custom_snapshot_deck_cards_snapshot_custom_card_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.custom_snapshot_deck_cards
+    ADD CONSTRAINT custom_snapshot_deck_cards_snapshot_custom_card_id_fkey FOREIGN KEY (snapshot_custom_card_id) REFERENCES public.snapshot_custom_cards(id);
+
+
+--
+-- Name: custom_snapshot_decks custom_snapshot_decks_parent_deck_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.custom_snapshot_decks
+    ADD CONSTRAINT custom_snapshot_decks_parent_deck_id_fkey FOREIGN KEY (parent_deck_id) REFERENCES public.custom_snapshot_decks(id);
+
+
+--
+-- Name: custom_snapshot_decks custom_snapshot_decks_snapshot_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.custom_snapshot_decks
+    ADD CONSTRAINT custom_snapshot_decks_snapshot_id_fkey FOREIGN KEY (snapshot_id) REFERENCES public.custom_collection_snapshots(id) ON DELETE CASCADE;
+
+
+--
+-- Name: custom_snapshot_decks custom_snapshot_decks_source_deck_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.custom_snapshot_decks
+    ADD CONSTRAINT custom_snapshot_decks_source_deck_id_fkey FOREIGN KEY (source_deck_id) REFERENCES public.custom_collection_decks(id);
+
+
+--
+-- Name: deck_collections deck_collections_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.deck_collections
@@ -1298,7 +2047,7 @@ ALTER TABLE ONLY public.deck_collections
 
 
 --
--- Name: match_participants match_participants_match_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: match_participants match_participants_match_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.match_participants
@@ -1306,7 +2055,7 @@ ALTER TABLE ONLY public.match_participants
 
 
 --
--- Name: match_participants match_participants_player_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: match_participants match_participants_player_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.match_participants
@@ -1314,7 +2063,7 @@ ALTER TABLE ONLY public.match_participants
 
 
 --
--- Name: matches matches_round_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: matches matches_round_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.matches
@@ -1322,7 +2071,7 @@ ALTER TABLE ONLY public.matches
 
 
 --
--- Name: matches matches_tournament_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: matches matches_tournament_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.matches
@@ -1330,7 +2079,7 @@ ALTER TABLE ONLY public.matches
 
 
 --
--- Name: organizers organizers_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: organizers organizers_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.organizers
@@ -1338,7 +2087,7 @@ ALTER TABLE ONLY public.organizers
 
 
 --
--- Name: player_tournament_decks player_tournament_decks_snapshot_deck_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: player_tournament_decks player_tournament_decks_snapshot_deck_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.player_tournament_decks
@@ -1346,7 +2095,7 @@ ALTER TABLE ONLY public.player_tournament_decks
 
 
 --
--- Name: player_tournament_decks player_tournament_decks_tournament_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: player_tournament_decks player_tournament_decks_tournament_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.player_tournament_decks
@@ -1354,7 +2103,7 @@ ALTER TABLE ONLY public.player_tournament_decks
 
 
 --
--- Name: player_tournament_decks player_tournament_decks_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: player_tournament_decks player_tournament_decks_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.player_tournament_decks
@@ -1362,7 +2111,7 @@ ALTER TABLE ONLY public.player_tournament_decks
 
 
 --
--- Name: refresh_tokens refresh_tokens_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: refresh_tokens refresh_tokens_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.refresh_tokens
@@ -1370,7 +2119,23 @@ ALTER TABLE ONLY public.refresh_tokens
 
 
 --
--- Name: snapshot_deck_cards snapshot_deck_cards_card_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: snapshot_custom_cards snapshot_custom_cards_snapshot_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.snapshot_custom_cards
+    ADD CONSTRAINT snapshot_custom_cards_snapshot_id_fkey FOREIGN KEY (snapshot_id) REFERENCES public.custom_collection_snapshots(id) ON DELETE CASCADE;
+
+
+--
+-- Name: snapshot_custom_cards snapshot_custom_cards_source_custom_card_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.snapshot_custom_cards
+    ADD CONSTRAINT snapshot_custom_cards_source_custom_card_id_fkey FOREIGN KEY (source_custom_card_id) REFERENCES public.custom_cards(id);
+
+
+--
+-- Name: snapshot_deck_cards snapshot_deck_cards_card_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.snapshot_deck_cards
@@ -1378,7 +2143,7 @@ ALTER TABLE ONLY public.snapshot_deck_cards
 
 
 --
--- Name: snapshot_deck_cards snapshot_deck_cards_deck_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: snapshot_deck_cards snapshot_deck_cards_deck_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.snapshot_deck_cards
@@ -1386,7 +2151,7 @@ ALTER TABLE ONLY public.snapshot_deck_cards
 
 
 --
--- Name: snapshot_decks snapshot_decks_parent_deck_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: snapshot_decks snapshot_decks_parent_deck_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.snapshot_decks
@@ -1394,7 +2159,7 @@ ALTER TABLE ONLY public.snapshot_decks
 
 
 --
--- Name: snapshot_decks snapshot_decks_snapshot_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: snapshot_decks snapshot_decks_snapshot_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.snapshot_decks
@@ -1402,7 +2167,7 @@ ALTER TABLE ONLY public.snapshot_decks
 
 
 --
--- Name: snapshot_decks snapshot_decks_source_deck_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: snapshot_decks snapshot_decks_source_deck_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.snapshot_decks
@@ -1410,7 +2175,15 @@ ALTER TABLE ONLY public.snapshot_decks
 
 
 --
--- Name: tournament_participants tournament_participants_tournament_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: tournament_participants tournament_participants_assigned_deck_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.tournament_participants
+    ADD CONSTRAINT tournament_participants_assigned_deck_id_fkey FOREIGN KEY (assigned_deck_id) REFERENCES public.collection_decks(id);
+
+
+--
+-- Name: tournament_participants tournament_participants_tournament_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.tournament_participants
@@ -1418,7 +2191,7 @@ ALTER TABLE ONLY public.tournament_participants
 
 
 --
--- Name: tournament_participants tournament_participants_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: tournament_participants tournament_participants_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.tournament_participants
@@ -1426,7 +2199,7 @@ ALTER TABLE ONLY public.tournament_participants
 
 
 --
--- Name: tournament_rounds tournament_rounds_tournament_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: tournament_rounds tournament_rounds_tournament_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.tournament_rounds
@@ -1434,7 +2207,15 @@ ALTER TABLE ONLY public.tournament_rounds
 
 
 --
--- Name: tournament_series tournament_series_organizer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: tournament_series tournament_series_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.tournament_series
+    ADD CONSTRAINT tournament_series_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(id);
+
+
+--
+-- Name: tournament_series tournament_series_organizer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.tournament_series
@@ -1442,7 +2223,15 @@ ALTER TABLE ONLY public.tournament_series
 
 
 --
--- Name: tournaments tournaments_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: tournaments tournaments_collection_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
+--
+
+ALTER TABLE ONLY public.tournaments
+    ADD CONSTRAINT tournaments_collection_id_fkey FOREIGN KEY (collection_id) REFERENCES public.deck_collections(id);
+
+
+--
+-- Name: tournaments tournaments_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.tournaments
@@ -1450,7 +2239,7 @@ ALTER TABLE ONLY public.tournaments
 
 
 --
--- Name: tournaments tournaments_format_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: tournaments tournaments_format_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.tournaments
@@ -1458,7 +2247,7 @@ ALTER TABLE ONLY public.tournaments
 
 
 --
--- Name: tournaments tournaments_series_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: tournaments tournaments_series_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.tournaments
@@ -1466,7 +2255,7 @@ ALTER TABLE ONLY public.tournaments
 
 
 --
--- Name: user_organizations user_organizations_organization_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: user_organizations user_organizations_organization_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.user_organizations
@@ -1474,7 +2263,7 @@ ALTER TABLE ONLY public.user_organizations
 
 
 --
--- Name: user_organizations user_organizations_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: user_organizations user_organizations_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: balduinberger
 --
 
 ALTER TABLE ONLY public.user_organizations
@@ -1482,6 +2271,16 @@ ALTER TABLE ONLY public.user_organizations
 
 
 --
+-- Name: SCHEMA public; Type: ACL; Schema: -; Owner: balduinberger
+--
+
+REVOKE USAGE ON SCHEMA public FROM PUBLIC;
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+--
 -- PostgreSQL database dump complete
 --
+
+\unrestrict qEa95UBhYiqmtIoEUzv7hlPhpHaPjJJ6cj6FpRnFBaeKaJLgfddyEXieXbBF2Ik
 

@@ -1,29 +1,30 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '../hooks/useToast';
 import { api } from '../api/client';
 import { Ticket, ArrowRight } from 'lucide-react';
 import './JoinTournament.css';
 
 export default function JoinTournament() {
-  const { inviteCode: urlCode } = useParams();
-  const [inviteCode, setInviteCode] = useState(urlCode || '');
+  const [searchParams] = useSearchParams();
+  const urlCode = searchParams.get('code') || '';
+  const [inviteCode, setInviteCode] = useState(urlCode);
   const [loading, setLoading] = useState(false);
+  const [autoJoining, setAutoJoining] = useState(false);
 
   const navigate = useNavigate();
   const toast = useToast();
 
   // Auto-join if code in URL
   useEffect(() => {
-    if (urlCode) {
-      handleJoin();
+    if (urlCode && !autoJoining) {
+      setAutoJoining(true);
+      joinTournament(urlCode);
     }
   }, [urlCode]);
 
-  const handleJoin = async (e) => {
-    if (e) e.preventDefault();
-    
-    if (!inviteCode.trim()) {
+  const joinTournament = async (code) => {
+    if (!code.trim()) {
       toast.error('Please enter an invite code');
       return;
     }
@@ -31,14 +32,20 @@ export default function JoinTournament() {
     setLoading(true);
 
     try {
-      const result = await api.tournaments.join(inviteCode.trim());
+      const result = await api.tournaments.join(code.trim());
       toast.success('Successfully joined the tournament!');
       navigate(`/tournaments/${result.tournamentId}`);
     } catch (err) {
       toast.error(err.message || 'Failed to join tournament');
+      setAutoJoining(false);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleJoin = async (e) => {
+    e.preventDefault();
+    await joinTournament(inviteCode);
   };
 
   return (
